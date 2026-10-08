@@ -3,476 +3,523 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PageRank · World Changer</title>
+<title>PageRank Explorer</title>
 <style>
-:root{--bg:#f7f6f2;--card:#fff;--ink:#26251f;--mut:#6b6a63;--line:#dedcd3;--acc:#3c3489;--accbg:#eeedfe;--ok:#27500a;--okbg:#eaf3de;--bad:#791f1f;--badbg:#fcebeb;--warn:#633806;--warnbg:#faeeda}
-@media (prefers-color-scheme:dark){:root{--bg:#1c1b18;--card:#262520;--ink:#efede6;--mut:#a3a199;--line:#3d3b34;--acc:#cecbf6;--accbg:#2a2754;--ok:#c0dd97;--okbg:#27350f;--bad:#f7c1c1;--badbg:#4a1b1b;--warn:#fac775;--warnbg:#3d2a0c}}
+:root{--bg:#f3f5fa;--card:#fff;--ink:#19243b;--mut:#53627b;--line:#d9e0ec;--acc:#5143ba;--accbg:#eeecff;--ok:#205137;--okbg:#e8f5ec;--bad:#791f1f;--badbg:#fcebeb;--edge:#8794aa;--hl:#EF9F27}
+@media(prefers-color-scheme:dark){:root{--bg:#141b29;--card:#1e293b;--ink:#edf2fa;--mut:#b5c2d5;--line:#3a4960;--acc:#b8afff;--accbg:#302b50;--ok:#b2e3c3;--okbg:#203c32;--bad:#f7c1c1;--badbg:#4a1b1b;--edge:#7d8ba3}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-.app{max-width:1040px;margin:0 auto;padding:20px 16px 40px}
-.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-.brand{font-weight:600;font-size:17px}
-.brand span{color:var(--mut);font-weight:400}
-.steps{display:flex;gap:8px;flex-wrap:wrap}
-.pill{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:14px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{max-width:1160px;margin:0 auto;padding:28px 20px 60px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 22px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.brand{font-weight:600;font-size:21px;letter-spacing:-.5px}
+.brand span{display:block;color:var(--mut);font-weight:400;font-size:13px;letter-spacing:.04em}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:14px;min-height:38px}
 .pill.on{background:var(--acc);color:var(--card);border-color:var(--acc)}
-.pill.done{border-color:var(--ok)}
-.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px}
-@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-.card h2{margin:0 0 4px;font-size:17px;font-weight:600}
-.tag{display:inline-block;font-size:12px;background:var(--accbg);color:var(--acc);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.pill.done:not(.on){border-color:var(--ok);color:var(--ok)}
+.pill:disabled{opacity:.4;cursor:default}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(min-width:861px){.grid>.card:first-child{position:sticky;top:20px}}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 8px 32px #19243b06}
+.card h2{margin:0 0 6px;font-size:21px;letter-spacing:-.4px;line-height:1.3}
+.card h3{margin:26px 0 6px;font-size:18px;letter-spacing:-.3px}
+.card p{margin:0 0 10px}
 .mut{color:var(--mut);font-size:14px}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
-button.b{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
-button.b:hover{border-color:var(--acc)}
+.small{font-size:13px;color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+button.b{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;font:inherit;font-size:14px;cursor:pointer;min-height:42px}
+button.b:hover:not(:disabled){border-color:var(--acc)}
 button.b.main{background:var(--acc);color:var(--card);border-color:var(--acc)}
-button.b.on{border-color:var(--acc);background:var(--accbg);color:var(--acc)}
-select,input[type=range],input[type=text]{font:inherit}
-select,input[type=text]{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
-input[type=text]{width:100%}
-table.m{border-collapse:collapse;width:100%;table-layout:fixed;font-size:14px}
-table.m td{padding:4px 6px;text-align:center}
-table.m tr.sel{background:var(--accbg)}
-.note{border-radius:8px;padding:8px 12px;font-size:14px;margin:10px 0}
-.note.warn{background:var(--warnbg);color:var(--warn)}
+button.b.ghost{border-color:transparent;color:var(--mut)}
+button.b.on{border-color:var(--acc);background:var(--accbg);color:var(--acc);font-weight:600}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,[role=button]:focus-visible{outline:3px solid #ed9a27;outline-offset:3px}
+input[type=text]{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.note{border-radius:10px;padding:10px 14px;font-size:14px;margin:12px 0}
 .note.ok{background:var(--okbg);color:var(--ok)}
 .note.bad{background:var(--badbg);color:var(--bad)}
 .note.info{background:var(--accbg);color:var(--acc)}
-.story{border-left:3px solid var(--acc);padding:6px 12px;margin:10px 0;background:var(--bg);border-radius:0 8px 8px 0}
-.story .lab{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
-.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px}
-.bar i{display:block;height:14px;border-radius:4px}
-.bar .t{width:16px;font-weight:600}
-.bar .nm{width:104px;color:var(--mut);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar .v{width:44px;text-align:right;color:var(--mut)}
-.foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:8px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+[hidden]{display:none!important}
 svg text{font-family:inherit}
 
-:root{--bg:#f3f5fa;--card:#fff;--ink:#19243b;--mut:#53627b;--line:#d9e0ec;--acc:#5143ba;--accbg:#eeecff;--ok:#205137;--okbg:#e8f5ec}
-body{font-size:16px;line-height:1.65}.app{max-width:1160px;padding:28px 20px 60px}.top{padding:8px 0 22px;border-bottom:1px solid var(--line);margin-bottom:24px}.brand{font-size:21px;letter-spacing:-.5px}.brand span{display:block;font-size:13px;letter-spacing:.04em}.card{padding:24px;border-radius:20px;box-shadow:0 8px 32px #19243b06}.card h2{font-size:21px;letter-spacing:-.4px}.grid{align-items:start}.story{padding:14px 16px;margin:18px 0}.b,.pill{min-height:42px}button.b{padding:9px 14px;border-radius:10px}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[role=button]:focus-visible{outline:3px solid #ed9a27;outline-offset:3px}.hero{padding:clamp(22px,5vw,54px);background:linear-gradient(140deg,var(--card),var(--accbg));margin-bottom:20px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--acc);font-weight:700}.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.12;letter-spacing:-1.6px;margin:14px 0}.hero p{max-width:660px}.paths{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}.path{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.path p{font-size:15px}.small{font-size:13px;color:var(--mut)}.statusline{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.statusline span{border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:13px}.calc{background:var(--bg);border-radius:12px;padding:14px;margin:14px 0}.calc table{font-size:13px}table.m th{padding:6px;text-align:center;font-weight:600}.scroll-table{overflow-x:auto}table.compare{min-width:330px}.progress-label{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--mut)}input[type=range]{width:100%;accent-color:var(--acc)}.slider-wrap{flex:1;min-width:180px}.source{font-size:12px;color:var(--mut);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}.bar .v{width:66px;font-variant-numeric:tabular-nums}.bar .nm{width:150px}.bar i{max-width:140px}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}.legend span:before{content:'●';margin-right:5px}.foot{margin-top:22px}.footer-note{margin-top:28px;text-align:center;font-size:12px;color:var(--mut)}[hidden]{display:none!important}#predictResult,#mkst{scroll-margin-top:20px}#g{max-height:370px}#steps{gap:6px}.tag{font-size:11px;letter-spacing:.04em}.finish{background:var(--okbg);padding:16px;border-radius:12px;margin:14px 0}
-
-/* ---------- clean-up ---------- */
-table.m.click{user-select:none}
-table.m.click tr[tabindex]{cursor:pointer}
-table.m.click tr[tabindex]:hover{background:var(--accbg)}
-table.m th{font-weight:600;font-size:13px}
-table.m th.corner{font-weight:400;color:var(--mut);font-size:11px}
-table.m td,table.m th{padding:8px 4px}
-table.m .z{color:var(--mut);opacity:.5}
-.world{font-size:15px}
+/* welcome + world picker */
+.hero{padding:clamp(22px,5vw,54px);background:linear-gradient(140deg,var(--card),var(--accbg))}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--acc);font-weight:700}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.12;letter-spacing:-1.6px;margin:14px 0}
+.hero p{max-width:660px}
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+.path{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.path p{font-size:15px}
+.tag{display:inline-block;font-size:11px;letter-spacing:.04em;background:var(--accbg);color:var(--acc);border-radius:6px;padding:2px 8px;margin-bottom:8px}
 .preview{border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px}
 .preview h3{margin:0 0 4px}
 .cast{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
-.cast i{width:10px;height:10px;border-radius:50%;display:inline-block}
-/* ---------- polish ---------- */
-.node{cursor:pointer}.node:hover circle:last-of-type{filter:brightness(1.08)}
-#g{max-height:400px}
-.bars{display:grid;gap:9px;margin:14px 0}
-.bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin:0}
-.bars .bar:has(.rk){grid-template-columns:22px auto 1fr auto}
-.bar .nm{width:130px;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar .track{height:12px;background:var(--line);border-radius:99px;overflow:hidden}
-.bar .track i{display:block;height:100%;max-width:none;border-radius:99px;transition:width .35s ease}
-.bar .v{width:auto;min-width:56px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13px}
-.bar .rk{width:22px;height:22px;border-radius:50%;background:var(--accbg);color:var(--acc);font-size:12px;font-weight:700;display:grid;place-items:center}
+.cast i,.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+
+/* graph */
+#g{width:100%;max-height:430px;margin-top:6px}
+.node{cursor:pointer}
+.node:hover .core{filter:brightness(1.08)}
+.surfer{transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.surfer.fast{transition:none}
+.appear{animation:appear .6s ease}
+@keyframes appear{from{opacity:0}to{opacity:1}}
+
+/* lesson panel */
+.story{border-left:4px solid var(--acc);padding:12px 16px;margin:14px 0;background:var(--bg);border-radius:0 12px 12px 0}
+.prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 10px}.prog i{display:block;height:100%;background:var(--acc)}.pcard .pr{margin-left:6px;color:var(--acc)}
+.story .lab{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
 .ctrl{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:16px 0}
-.ctrl-row{display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;font-size:14px}
+.ctrl-h{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);font-weight:700;margin-bottom:4px}
+.ctrl-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:6px}
 .badge{background:var(--acc);color:var(--card);border-radius:8px;padding:2px 10px;font-weight:700;font-variant-numeric:tabular-nums}
-.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-button.b.sm{min-height:32px;padding:4px 10px;font-size:13px}
-button.b.ghost{border-color:transparent;color:var(--mut)}
-.sw{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:500}
-.sw input{position:absolute;opacity:0;width:1px;height:1px}
-.sw .knob{width:40px;height:22px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .2s}
-.sw .knob:after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
-.sw input:checked+.knob{background:#D85A30}.sw input:checked+.knob:after{transform:translateX(18px)}
-.sw input:focus-visible+.knob{outline:3px solid #ed9a27;outline-offset:2px}
-details.calc{padding:0}details.calc summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:14px}details.calc[open]{padding-bottom:12px}details.calc>*:not(summary){margin-left:14px;margin-right:14px}
-.story{border-left-width:4px}
-/* ---------- quick-check pop-up ---------- */
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+table.vt{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;font-variant-numeric:tabular-nums}
+table.vt th{font-size:12px;color:var(--mut);font-weight:600;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.vt td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line)}
+table.vt th:first-child,table.vt td:first-child{text-align:left}
+table.vt td:first-child{display:flex;align-items:center;gap:8px}
+table.vt tr:last-child td{border-bottom:0}
+.bars{display:grid;gap:9px;margin:14px 0}
+.bar{display:grid;grid-template-columns:150px 1fr 48px;align-items:center;gap:12px}
+.bar.ranked{grid-template-columns:22px 150px 1fr 48px}
+.bar .nm{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px}
+.bar .track{height:12px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar .track i{display:block;height:100%;border-radius:99px;transition:width .3s ease}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13px}
+.bar .rk{width:22px;height:22px;border-radius:50%;background:var(--accbg);color:var(--acc);font-size:12px;font-weight:700;display:grid;place-items:center}
+.pcards{display:grid;gap:8px;margin:14px 0}
+button.pcard{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+button.pcard .dot{margin-top:6px}
+button.pcard:hover{border-color:var(--acc)}
+button.pcard.on{border-color:var(--acc);background:var(--accbg)}
+.opts{display:grid;gap:8px;margin:10px 0 4px}
+button.opt{text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 14px;font:inherit;font-size:15px;cursor:pointer}
+button.opt:hover:not(:disabled){border-color:var(--acc)}
+button.opt.on{border-color:var(--acc);background:var(--accbg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.seg button{border:0;border-right:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-size:14px;padding:8px 14px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:var(--card)}
+.statusline{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.statusline span{border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px}
+.statusline .okc{border-color:var(--ok);color:var(--ok)}
+.formula{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:21px;text-align:center;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin:10px 0}
+details.calc{background:var(--bg);border:1px solid var(--line);border-radius:12px;margin:14px 0}
+details.calc summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:14px}
+details.calc>*:not(summary){margin-left:14px;margin-right:14px}
+details.calc[open]{padding-bottom:12px}
+table.m{border-collapse:collapse;width:100%;table-layout:fixed;font-size:13px;margin:6px 0}
+table.m td,table.m th{padding:6px 4px;text-align:center}
+table.m th{font-weight:600}
+table.m th.corner{font-weight:400;color:var(--mut);font-size:11px}
+table.m tr.sel{background:var(--accbg)}table.m tr{cursor:pointer}table.m .z{color:var(--mut);opacity:.5}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:8px}
+.finish{background:var(--okbg);color:var(--ok);padding:16px;border-radius:12px;margin:14px 0}
+#s4b{scroll-margin-top:20px}
+
+/* quick-check pop-up */
 .modal{position:fixed;inset:0;background:rgba(15,20,35,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
 .dialog{background:var(--card);border:1px solid var(--line);border-radius:20px;width:100%;max-width:580px;max-height:92vh;overflow:auto;padding:22px 24px;box-shadow:0 24px 64px rgba(0,0,0,.28)}
 .dhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .dialog h3{font-size:19px;line-height:1.4;margin:6px 0 10px}
 .x{border:none;background:none;color:var(--mut);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}
-.x:hover{color:var(--ink)}
-.opt{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer;font-size:15px}
-.opt input{margin-top:5px;accent-color:var(--acc)}
-.opt:hover{border-color:var(--acc)}
-.opt:has(input:checked){border-color:var(--acc);background:var(--accbg)}
-.opt.disabled{opacity:.7;cursor:default}
+.opt-r{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer;font-size:15px}
+.opt-r input{margin-top:5px;accent-color:var(--acc)}
+.opt-r:hover{border-color:var(--acc)}
+.opt-r:has(input:checked){border-color:var(--acc);background:var(--accbg)}
+.opt-r.disabled{opacity:.7;cursor:default}
 .hint{display:flex;gap:12px;align-items:flex-start;background:var(--accbg);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14px}
-.hint .bot{font-size:26px;line-height:1}
-.ready{margin-top:18px;font-size:14px;color:var(--mut)}
+.hint .bot{font-size:24px;line-height:1}
 body.lock{overflow:hidden}
 
-@media(min-width:821px){.grid>.card:first-child{position:sticky;top:20px}}
-@media(max-width:650px){.paths{grid-template-columns:1fr}.app{padding:16px 12px 36px}.card{padding:18px}.top{align-items:flex-start}.foot{flex-wrap:wrap}.bar .nm{width:88px}#steps .pill{font-size:12px;padding:6px 10px}.dialog{padding:18px}}
-@media(prefers-color-scheme:dark){:root{--bg:#141b29;--card:#1e293b;--ink:#edf2fa;--mut:#b5c2d5;--line:#3a4960;--acc:#b8afff;--accbg:#302b50;--ok:#b2e3c3;--okbg:#203c32}.pill.on,button.b.main{color:#171c2d}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media(max-width:650px){.paths{grid-template-columns:1fr}.app{padding:16px 12px 36px}.card{padding:18px}.bar{grid-template-columns:110px 1fr 44px}.bar.ranked{grid-template-columns:22px 104px 1fr 44px}.pill{font-size:12px;padding:5px 10px}.dialog{padding:18px}.seg button{padding:8px 10px}}
+@media(prefers-color-scheme:dark){.pill.on,button.b.main,.seg button.on,.badge{color:#171c2d}}
+@media(prefers-reduced-motion:reduce){.surfer,.bar .track i{transition:none}.appear{animation:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand">PageRank <span>WORLD CHANGER · FOLLOW THE FLOW</span></div>
+    <div class="brand">PageRank Explorer <span>WORLD CHANGER · FOLLOW THE FLOW</span></div>
     <div class="steps" id="steps"></div>
   </div>
 
   <section id="welcome" class="card hero" aria-labelledby="welcomeTitle">
-    <div class="eyebrow">An interactive learning activity · about 30 minutes</div>
+    <div class="eyebrow">An interactive lesson · about 30 minutes</div>
     <h1 id="welcomeTitle">A different world.<br>The same PageRank.</h1>
-    <p>Follow links, watch probability move, and discover how repeated visits become a ranking. Choose the setting that helps you connect with the idea.</p>
+    <p>Follow a random surfer, watch the values settle, and discover how a search engine decides which pages matter more.</p>
     <div id="assignedNote" class="note info" hidden></div>
     <div class="paths">
-      <article class="path" id="aiPath"><span class="tag">AI-feature prototype</span><h2>Change my world</h2><p>Describe an interest. Preview a story about football, music, cooking, a food trip, Batman, or your own topic, then follow it through the lesson.</p><button class="b main" onclick="choosePath('ai')">Explore World Changer</button></article>
-      <article class="path" id="controlPath"><span class="tag">Non-AI path</span><h2>Explore the web</h2><p>Use the classic random-surfer story: four web pages connected by links. All calculations, controls, and questions are the same.</p><button class="b main" onclick="choosePath('control')">Start with web pages</button></article>
+      <article class="path" id="aiPath"><span class="tag">✨ World Changer</span><h2>Change my world</h2><p>Learn PageRank inside a story you like: football, music, cooking, a food trip, Batman, or your own topic.</p><button class="b main" onclick="choosePath('ai')">Choose my world</button></article>
+      <article class="path" id="controlPath"><span class="tag">Classic</span><h2>Explore the web</h2><p>Learn PageRank with web pages connected by links.</p><button class="b main" onclick="choosePath('control')">Start with web pages</button></article>
     </div>
   </section>
 
   <div class="card" id="start" style="display:none;max-width:560px;margin:40px auto">
-    <div class="eyebrow">World Changer</div><h2>Choose your world</h2>
+    <div class="eyebrow">✨ World Changer</div><h2>Choose your world</h2>
     <p class="mut">Pick a world or type your own. Only the story changes; the links and the maths stay the same.</p>
-        <div class="chips">
-      <button class="b world" onclick="pick('Football')">⚽ Football</button>
-      <button class="b world" onclick="pick('Music')">🎵 Music</button>
-      <button class="b world" onclick="pick('Cooking')">🍳 Cooking</button>
-      <button class="b world" onclick="pick('Food trip')">🍜 Food trip</button>
-      <button class="b world" onclick="pick('Batman')">🦇 Batman</button>
+    <div class="chips">
+      <button class="b" onclick="pick('Football')">⚽ Football</button>
+      <button class="b" onclick="pick('Music')">🎵 Music</button>
+      <button class="b" onclick="pick('Cooking')">🍳 Cooking</button>
+      <button class="b" onclick="pick('Food trip')">🍜 Food trip</button>
+      <button class="b" onclick="pick('Batman')">🦇 Batman</button>
     </div>
-    <div class="row" style="flex-wrap:nowrap"><input type="text" id="interest" maxlength="40" placeholder="…or type your own, e.g. basketball" aria-label="Your interest"><button class="b main" id="mk" onclick="makeWorld()">Create</button></div>
-    <div id="mkst" class="mut" role="status" aria-live="polite"></div><div id="worldPreview" hidden></div><button class="b" id="interestBack" onclick="showChooser()" style="margin-top:8px">Back</button>
+    <div class="row" style="flex-wrap:nowrap"><input type="text" id="interest" maxlength="40" placeholder="…or type your own, e.g. basketball" aria-label="Your interest"><button class="b main" onclick="makeWorld()">Create</button></div>
+    <div id="mkst" class="mut" role="status" aria-live="polite"></div><div id="worldPreview" hidden></div>
+    <button class="b" id="interestBack" onclick="showChooser()" style="margin-top:8px">Back</button>
   </div>
 
   <div id="main" style="display:none">
     <div class="grid">
       <div class="card">
-        <div class="row" style="margin:0 0 4px;justify-content:space-between">
-          <h2 id="wtitle" style="margin:0"></h2>
-        </div>
-        <div class="mut" id="wintro"></div>
-        <svg id="g" viewBox="0 20 520 330" style="margin-top:14px" width="100%" role="img" aria-label="Four-item link graph">
-          <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <h2 id="wtitle"></h2>
+        <div class="mut" id="wsub"></div>
+        <svg id="g" viewBox="20 10 490 350" role="img" aria-label="Link graph">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" style="stroke:var(--edge)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <marker id="arrh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#EF9F27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+          </defs>
           <g id="edges"></g><g id="nodes"></g>
+          <g id="surfer" class="surfer" style="display:none"><circle r="10" style="fill:var(--card);stroke:var(--ink)" stroke-width="2.5"/><circle r="4" style="fill:var(--ink)"/></g>
         </svg>
       </div>
       <div class="card" id="panel"></div>
     </div>
   </div>
-  <div class="foot" id="navigation" style="display:none"><button class="b" id="prev">Back</button><button class="b main" id="next">Quick check</button></div>
+  <div class="foot" id="navigation" style="display:none"><button class="b" id="prev">Back</button><button class="b main" id="next"></button></div>
 </div>
 
-<!-- quick-check pop-up -->
 <div id="modal" class="modal" hidden>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="mq">
     <div class="dhead"><span class="tag" id="mtag" style="margin:0"></span><button class="x" aria-label="Close" onclick="closeCheck()">×</button></div>
     <h3 id="mq"></h3>
     <div id="mopts" role="radiogroup" aria-labelledby="mq"></div>
-    <div class="row" id="msubmitRow"><button class="b main" id="msubmit" onclick="doCheck()">Submit</button></div>
+    <div class="row" id="msubmitRow"><button class="b main" onclick="doCheck()">Submit</button></div>
     <div id="fb" role="status" aria-live="polite"></div>
     <div id="mafter"></div>
   </div>
 </div>
 
 <script>
-var MODE='ai', SOURCE='fixed', THEME='web', pendingWorld=null, playTimer=null;
-var params=new URLSearchParams(location.search), assigned=params.get('condition');
+/* ================= setup ================= */
+var MODE='ai',SOURCE='fixed',THEME='web',pendingWorld=null;
+var params=new URLSearchParams(location.search),assigned=params.get('condition');
 if(assigned!=='ai'&&assigned!=='control')assigned=null;
-var TOL=0.0001, MAX_ITER=200;
-var N=['A','B','C','D'],COL=['#7F77DD','#1D9E75','#D85A30','#BA7517'];
-var POS=[[130,100],[370,100],[370,250],[130,250]];
-var STARTS=[[.25,.25,.25,.25],[1,0,0,0],[0,0,1,0],[0,0,0,1]];
-var S={scr:0,sel:0,alpha:0,trap:false,noAB:false,start:0,it:0,view:0,dest:2,hist:[],solved:[false,false,false,false],attempts:[0,0,0,0],unlocked:0,whatif:false};
-var PRESET=[{alpha:0,trap:false,noAB:false},{alpha:0,trap:false,noAB:false},{alpha:0.15,trap:false,noAB:false},{alpha:0.15,trap:false,noAB:false}];
+/* One fixed graph: A→B,C · B→C · C→A · D→C. E is added in the damping section, with no links in or out. */
+var L=['A','B','C','D','E'];
+var COL=['#7F77DD','#1D9E75','#D85A30','#BA7517','#C2408A'];
+var POS=[[130,100],[370,100],[370,250],[130,250],[590,175]];
+var LINKS=[[1,2],[2],[0],[2],[]];
+var TABS=[{id:'intro',name:'Intro'},{id:'surfer',name:'Surfer'},{id:'prob',name:'Probabilities'},{id:'conv',name:'Convergence'},{id:'damp',name:'Damping'},{id:'final',name:'Final'}];
+var TOL=1e-4,MAXIT=300,AFINAL=0.15;
+var S,SIM1,SIM4,IT,FIN,CQ=0,lastFocus=null;
 
-/* ---------- worlds: same graph (A→B,C · B→C · C→A · D→C), only the story changes ---------- */
-var DEFAULT={title:'Four web pages',intro:'A surfer clicks links at random. A page matters if the surfer spends a lot of time on it.',
- names:['Page A','Page B','Page C','Page D'],
- s1:'The surfer is on a page and picks one of its outgoing links at random. Every link is equally likely.',
- s2:'Sometimes the surfer gets bored and jumps to a random page. That jump keeps the surfer from getting stuck.',
- s3:'We follow the surfer step by step. With positive random jumps, repeated updates settle into stable visit shares.',
- s4:'The page the surfer visits most ranks first.',
- sink:'{C} links only to itself, so the surfer can never leave it. Nearly all rank piles up on {C}. Raise α to let the surfer escape.',
- unreach:'No page links to {D}, so the surfer never arrives there and {D} ends with no rank at all. Raise α and watch {D} come back.',
- ok:'The random jump gives every page a little rank, so nothing is stuck and nothing is at zero.',
- whatifBtn:'What if {A} stops linking to {B}?'};
-
-var PREP={
- football:{title:'Match day',intro:'The ball is passed at random. Whoever holds the ball most of the match matters most.',
-  names:['Midfielder','Winger','Striker','Substitute'],
-  s1:'Every player passes to one of the teammates they can reach, each option equally likely. {A} can pass to {B} or {C}. Click a player to see the passing row.',
-  s2:'Sometimes the ball runs loose and any player might pick it up. That random pickup is the jump. Without it, the ball can get stuck with one player.',
-  s3:'Play the match again and again. After many passes the share of time each player holds the ball stops changing, with positive random jumps, whoever kicked off.',
-  s4:'Rank the players by how long they hold the ball over the match.',
-  sink:'{C} only ever passes to {C}. Once the ball arrives it never leaves, so nearly all possession piles up on {C}. Raise α to allow loose balls.',
-  unreach:'Nobody passes to {D}, so {D} never touches the ball and ends with no rank at all. Raise α and a loose ball can find {D}.',
-  ok:'Loose balls give every player a few touches, so nobody is stuck and nobody is left out.',
-  whatifBtn:'What if {A} stops passing to {B}?'},
- music:{title:'Late-night playlist',intro:'Autoplay picks the next track at random. The tracks that get the most listening time matter most.',
-  names:['Indie anthem','B-side','Hit single','Demo tape'],
-  s1:'Each track suggests a few next tracks and autoplay picks one at random. {A} can lead into {B} or {C}. Click a track to see its row.',
-  s2:'Sometimes the listener hits shuffle and lands anywhere. That shuffle is the random jump. Without it, a track on repeat can trap the listener.',
-  s3:'Keep listening and the share of time on each track settles, with positive random jumps, wherever the session started.',
-  s4:'Rank the tracks by how much of the listening time they get.',
-  sink:'{C} is on repeat and only leads back into {C}. The listener never leaves, so nearly all listening time piles up on {C}. Raise α to add shuffle.',
-  unreach:'No track leads into {D}, so autoplay never reaches it and it ends with no rank at all. Raise α and shuffle can land on it.',
-  ok:'Shuffle gives every track some plays, so nothing loops forever and nothing goes unheard.',
-  whatifBtn:'What if {A} stops leading into {B}?'},
- cooking:{title:'The family kitchen',intro:'The cook follows pairing tips at random. The dishes that end up on the table most often matter most.',
-  names:['Pasta night','Green salad','Garlic bread','Leftover soup'],
-  s1:'Every dish has pairing tips and the cook picks one at random. {A} pairs with {B} or {C}. Click a dish to see its row.',
-  s2:'Sometimes the cook ignores the tips and picks any dish. That is the random jump. Without it, a dish that pairs only with itself becomes a habit.',
-  s3:'Keep cooking at random and the share of meals each dish gets settles, with positive random jumps, whatever the first dish was.',
-  s4:'Rank the dishes by how often they end up on the table.',
-  sink:'{C} only pairs with itself, so once picked it is cooked forever. Nearly all meals pile up on {C}. Raise α to break the habit.',
-  unreach:'No dish pairs with {D}, so it never gets picked and ends with no rank at all. Raise α and a random pick can choose it.',
-  ok:'Random picks give every dish a turn, so nothing is stuck and nothing is forgotten.',
-  whatifBtn:'What if {A} stops pairing with {B}?'},
- foodtrip:{title:'The tastiest-food trip',intro:'A traveller follows locals\u2019 food tips at random to find the tastiest food in town. The places the traveller eats at most often matter most.',
-  names:['Market square','Street stall','Noodle house','Hidden bakery'],
-  s1:'At each place, the traveller asks a local and follows one of their tips, each equally likely. At {A}, locals point to {B} or {C}. Click a place to see its row.',
-  s2:'Sometimes the traveller ignores the tips and wanders anywhere in town. That wander is the random jump. Without it, the traveller can get stuck at one place forever.',
-  s3:'Keep eating your way around town. The share of meals at each place settles, with positive random jumps, wherever the trip began.',
-  s4:'Rank the places by how often the traveller eats there.',
-  sink:'{C} only ever recommends itself, so once the traveller arrives they never leave. Nearly all meals pile up on {C}. Raise α to let the traveller wander.',
-  unreach:'No local ever recommends {D}, so the traveller never finds it and {D} ends with no rank at all. Raise α and a random wander can discover it.',
-  ok:'Random wandering gives every place some visits, so the traveller is never stuck and no place is missed.',
-  whatifBtn:'What if {A} stops recommending {B}?'},
- batman:{title:'Batman\u2019s Gotham hunt',intro:'Batman hunts the Joker by following leads from his informants at random. The places he spends the most time at matter most.',
-  names:['Gotham streets','Crime scene','Arkham Asylum','Wayne Manor'],
-  s1:'From each place, Batman follows one of the leads his informants give him, each equally likely. From {A}, leads point to {B} or {C}. Click a place to see its row.',
-  s2:'Sometimes Commissioner Gordon calls with a tip that could send Batman anywhere in Gotham. That tip is the random jump. Without it, Batman can get stuck chasing one lead forever.',
-  s3:'Keep following leads night after night. The share of time Batman spends at each place settles, with positive random jumps, wherever the hunt began.',
-  s4:'Rank the places by how much of Batman\u2019s time they take.',
-  sink:'At {C}, every interrogation only points to another inmate inside {C}. Batman never leaves, so nearly all his time piles up on {C}. Raise α to let Gordon\u2019s tips pull him out.',
-  unreach:'No lead ever sends Batman to {D}, so he never goes home and {D} ends with no rank at all. Raise α and a tip can bring him back.',
-  ok:'Gordon\u2019s random tips give every place some of Batman\u2019s time, so he is never stuck and no place is ignored.',
-  whatifBtn:'What if {A} stops leading to {B}?'}
+/* ================= worlds: the story layer only (AI condition) ================= */
+var WORLDS={
+ web:{title:'A small web',names:['Page A','Page B','Page C','Page D','Page E'],unit:'page',units:'pages',link:'link',links:'links',who:'someone',surfer:'the surfer',jump:'jumps to a random page',st:null},
+ football:{title:'Match day',names:['Midfielder','Winger','Striker','Substitute','New signing'],unit:'player',units:'players',link:'pass',links:'passes',who:'the ball',surfer:'the ball',jump:'runs loose to any player on the pitch',st:{
+  intro:'Match day! The ball moves from player to player by passes.',
+  surfer:'The ball starts with {A}. Every player passes to one of the teammates they can reach.',
+  prob:'{A} can pass to {B} or {C}, so each pass is a 1/2 chance. {B} only ever passes to {C}.',
+  conv:'Over a long match, the share of time each player has the ball settles, whoever kicked off.',
+  unreach:'The club signs {E}, but nobody passes to the new signing yet.',
+  jump:'Now and then the ball runs loose, and any player on the pitch, even {E}, can pick it up.',
+  final:'Over the whole match, this is how much each player has the ball.'}},
+ music:{title:'Late-night playlist',names:['Indie anthem','B-side','Hit single','Demo tape','Secret track'],unit:'track',units:'tracks',link:'suggestion',links:'suggestions',who:'autoplay',surfer:'autoplay',jump:'shuffles to any track',st:{
+  intro:'It’s late and autoplay is on. Each track leads into a few others.',
+  surfer:'Your session starts with {A}. After each track, autoplay picks one of its suggestions.',
+  prob:'{A} suggests {B} and {C}, so each is a 1/2 chance. {B} always leads into {C}.',
+  conv:'After hours of listening, the share of time on each track settles, wherever the session began.',
+  unreach:'{E} is added to the library, but no track ever suggests it.',
+  jump:'Now and then you hit shuffle and land on any track, even {E}.',
+  final:'Over the whole night, this is how much of your listening each track gets.'}},
+ cooking:{title:'The family kitchen',names:['Pasta night','Green salad','Garlic bread','Leftover soup','New recipe'],unit:'dish',units:'dishes',link:'pairing tip',links:'pairing tips',who:'the cook',surfer:'the cook',jump:'picks any dish at random',st:{
+  intro:'In the family kitchen, every dish comes with pairing tips for the next meal.',
+  surfer:'The week starts with {A}. After each meal, the cook follows one of its pairing tips.',
+  prob:'{A} pairs with {B} or {C}, so each is a 1/2 chance. {B} always pairs with {C}.',
+  conv:'After many weeks, the share of meals each dish gets settles, whatever was cooked first.',
+  unreach:'Someone finds a {E}, but no dish pairs with it.',
+  jump:'Now and then the cook ignores the tips and picks any dish, even the {E}.',
+  final:'Over many weeks, this is how often each dish lands on the table.'}},
+ foodtrip:{title:'The tastiest-food trip',names:['Market square','Street stall','Noodle house','Hidden bakery','Secret food truck'],unit:'place',units:'places',link:'tip',links:'tips',who:'the traveller',surfer:'the traveller',jump:'wanders to any place in town',st:{
+  intro:'You’re on a trip to find the tastiest food in town, following locals’ tips from place to place.',
+  surfer:'You start at {A}. At each place, a local tips you off about where to eat next, and you go.',
+  prob:'At {A}, locals point to {B} or {C}, so each is a 1/2 chance. At {B}, everyone sends you to {C}.',
+  conv:'After many days of eating, the share of meals at each place settles, wherever the trip began.',
+  unreach:'You hear about a {E}, but no local ever recommends it.',
+  jump:'Now and then you skip the tips and wander anywhere in town, even to the {E}.',
+  final:'Over the whole trip, this is how often you eat at each place.'}},
+ batman:{title:'Batman’s Gotham hunt',names:['Gotham streets','Crime scene','Arkham Asylum','Wayne Manor','Joker’s hideout'],unit:'place',units:'places',link:'lead',links:'leads',who:'Batman',surfer:'Batman',jump:'follows a tip from Commissioner Gordon to any place in Gotham',st:{
+  intro:'The Joker is loose in Gotham. Batman moves from place to place by following leads from his informants.',
+  surfer:'Batman starts on the {A}. At every place, an informant offers a few leads, and he follows one of them.',
+  prob:'On the {A}, informants point to the {B} or {C}, so each lead is a 1/2 chance. From {C}, every lead points back to the streets.',
+  conv:'Night after night, the share of time Batman spends at each place settles, wherever the hunt began.',
+  unreach:'Batman hears about the {E}, but none of his informants has a lead that goes there.',
+  jump:'Sometimes Commissioner Gordon calls with a tip, and Batman goes straight to any place in Gotham, even the {E}.',
+  final:'Over the whole hunt, these are the places where Batman spends his time.'}}
 };
-var THEME_LABEL={football:'football',music:'music',cooking:'cooking',foodtrip:'food trip',batman:'Batman',custom:'your topic'};
-function templateWorld(x){
-  x=x.replace(/[<>&"]/g,'').trim().slice(0,16);if(!x)x='Your topic';x=x.charAt(0).toUpperCase()+x.slice(1);
-  return {title:'Your world: '+x,intro:'You explore '+x+' by following one recommendation after another, picked at random. The topics you land on most matter most.',
-   names:[x.slice(0,8)+' basics',x.slice(0,8)+' fans',x.slice(0,8)+' classic',x.slice(0,8)+' rookie'],
-   s1:'Each topic recommends a few others and you follow one at random. {A} points to {B} or {C}. Click a topic to see its row.',
-   s2:'Sometimes you ignore the recommendations and jump to any topic. That jump keeps you from getting stuck in one corner.',
-   s3:'Keep exploring at random. The share of time on each topic settles, with positive random jumps, wherever you started.',
-   s4:'Rank the topics by how much of your time they get.',
-   sink:'{C} only points back to itself, so once you arrive you never leave. Nearly all your time piles up on {C}. Raise α to allow jumps.',
-   unreach:'Nothing points to {D}, so you never arrive there and {D} ends with no rank at all. Raise α and a jump can land on it.',
-   ok:'Jumps give every topic some visits, so nothing is stuck and nothing is missed.',
-   whatifBtn:'What if {A} stops pointing to {B}?'};}
+function customWorld(x){x=x.replace(/[<>&"]/g,'').trim().slice(0,12);if(!x)x='Your topic';x=cap(x);
+ return {title:'Your world: '+x,names:[x+' basics',x+' fans',x+' classics',x+' rookies',x+' secrets'],unit:'topic',units:'topics',link:'recommendation',links:'recommendations',who:'the explorer',surfer:'the explorer',jump:'jumps to any topic at random',st:{
+  intro:'You explore '+x+' by following recommendations from one topic to the next.',
+  surfer:'Your exploration starts at {A}. Each topic recommends a few others, and you follow one of them.',
+  prob:'{A} recommends {B} and {C}, so each is a 1/2 chance. {B} always points on to {C}.',
+  conv:'After a long time exploring, the share of time on each topic settles, wherever you started.',
+  unreach:'You hear about {E}, but no topic ever recommends it.',
+  jump:'Now and then you ignore the recommendations and jump to any topic, even {E}.',
+  final:'Over the whole exploration, this is how much time each topic gets.'}};}
+var WORLD=WORLDS.web;
 
-var WORLD=DEFAULT;
-var FOCUS=[
- {name:'1 Links',tag:'Step 1 · Follow the links',title:'From arrows to probabilities',text:'Click a node or a row of P to see where it leads.'},
- {name:'2 Jumps',tag:'Step 2 · Extension: random jumps',title:'Break the loop, add a jump',text:'Turn on the trap, then raise α and watch what changes.'},
- {name:'3 Iterate',tag:'Step 3 · Move probability',title:'Power-iteration studio',text:'Step the update forward and watch the shares settle.'},
- {name:'4 Rank',tag:'Step 4 · Read the ranking',title:'Let the visit shares tell the story',text:'Read the ranking, then test a what-if.'}
-];
-
-/* ---------- quick checks ---------- */
-var QUESTIONS=['{A} has two outgoing links. What is its row of P (in the order {A}, {B}, {C}, {D})?','Suppose {C} links only to itself and α = 0. What happens in the long run?','With positive jumps, starting entirely on {D} instead of evenly leads to what after many iterations?','Suppose the links change and the final shares become {A} 0.20, {B} 0.45, {C} 0.30, {D} 0.05. Which ranking is correct?'];
-var OPTS=[
- ['(0, 0.5, 0.5, 0)','(0, 1, 1, 0)','(0.25, 0.25, 0.25, 0.25)',"I don't know"],
- ['Everyone ends up with equal rank','Nearly all rank piles up on {C} and the others fall toward 0','{C} drops to 0 because it has no outgoing links to others',"I don't know"],
- ['Different, because the start matters','The same π as from the equal start','Stuck on {D} forever',"I don't know"],
- ['{A} > {B} > {C} > {D}','{D} > {A} > {C} > {B}','{B} > {C} > {A} > {D}',"I don't know"]];
-var CORRECT=[0,1,1,2];
-var TAKEAWAYS=['Each outgoing link gets an equal part of a total probability of one. The row describes the next move from that node.','A self-loop can trap visits. A random jump can reach any node, including nodes without incoming links.','Power iteration moves probability through the graph repeatedly. With positive jumps, different starts approach the same stationary shares.','Rank by long-run visit share, highest first. Rank measures flow in this model, rather than quality.'];
-var HINTS=['Count {A}\u2019s outgoing arrows and divide a total probability of one between them.','Trace the only arrow leaving {C}. Is there a link that lets the walker leave?','Compare the four starts at the same late iteration with α = 0.15.','Compare the supplied visit shares and order them from largest to smallest.'];
-
-/* ---------- logging: every event is sent to the study backend ---------- */
-var LOG_ENDPOINT=params.get('logEndpoint')||'/api/log';
-var PID=params.get('pid')||('demo-'+Math.random().toString(36).slice(2,9)),sessionStart=performance.now(),SEQ=0;
-function log(type,data){
-  var ev={schemaVersion:1,seq:SEQ++,elapsedMs:Math.round(performance.now()-sessionStart),iso:new Date().toISOString(),pid:PID,assignedCondition:assigned,mode:MODE,theme:THEME,narrativeSource:SOURCE,screen:S.scr+1,type:type,data:data===undefined?null:data};
-  try{fetch(LOG_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev),keepalive:true}).catch(function(){});}catch(e){}
-}
-
-/* ---------- text helpers ---------- */
+/* ================= helpers ================= */
+function $(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function tpl(s){return esc(s).replace(/\{([ABCD])\}/g,function(m,l){return esc(WORLD.names[N.indexOf(l)]);});}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function tpl(s){return esc(s).replace(/\{(\w+)\}/g,function(m,k){var i=L.indexOf(k);if(i>=0)return esc(WORLD.names[i]);var lk=k.charAt(0).toLowerCase()+k.slice(1),v=WORLD[lk];if(typeof v!=='string')return m;return esc(k===lk?v:cap(v));});}
 function nm(i){return esc(WORLD.names[i]);}
-
-/* ---------- world creation (AI condition) ---------- */
-function detectTheme(interest){var k=interest.toLowerCase();
-  if(/batman|bat|gotham|joker|superhero|comic|detective/.test(k))return 'batman';
-  if(/trip|travel|tast|street|foodie|restaurant|cuisine|tour/.test(k))return 'foodtrip';
-  if(/foot|soccer|sport|basket|match|team|ball/.test(k))return 'football';
-  if(/music|song|band|playlist|pop|rock|rap|spotify/.test(k))return 'music';
-  if(/cook|food|bak|recipe|kitchen|eat/.test(k))return 'cooking';
-  return 'custom';}
-function pick(t){document.getElementById('interest').value=t;makeWorld();}
-function choosePath(mode){if(assigned&&mode!==assigned)return;pausePlay();MODE=mode;S.solved=[false,false,false,false];S.attempts=[0,0,0,0];S.unlocked=0;log('path_selected',{condition:mode});document.getElementById('welcome').hidden=true;if(mode==='ai'){showStart();}else{WORLD=DEFAULT;SOURCE='fixed';THEME='web';startLesson();}}
-function showChooser(){if(assigned)return;pausePlay();closeModal();document.getElementById('welcome').hidden=false;document.getElementById('start').style.display='none';document.getElementById('main').style.display='none';document.getElementById('navigation').style.display='none';document.getElementById('steps').style.visibility='hidden';log('chooser_open');}
-function makeWorld(){var v=document.getElementById('interest').value.trim();if(!v){document.getElementById('mkst').textContent='Pick a world or type a topic.';return;}var theme=detectTheme(v);pendingWorld={w:theme==='custom'?templateWorld(v):PREP[theme],theme:theme,src:theme==='custom'?'local-template':'prepared-story'};log('world_preview',{theme:theme,source:pendingWorld.src});var el=document.getElementById('worldPreview');el.hidden=false;el.innerHTML='<div class="preview"><h3>'+esc(pendingWorld.w.title)+'</h3><p>'+esc(pendingWorld.w.intro)+'</p><div class="chips">'+pendingWorld.w.names.map(function(n,i){return '<span class="cast"><i style="background:'+COL[i]+'"></i>'+esc(n)+'</span>';}).join('')+'</div><button class="b main" onclick="useWorld()">Start in this world →</button></div>';document.getElementById('mkst').textContent='';}
-function useWorld(){if(!pendingWorld)return;WORLD=pendingWorld.w;SOURCE=pendingWorld.src;THEME=pendingWorld.theme;log('world_confirmed',{theme:THEME,source:SOURCE});startLesson();}
-function startLesson(){document.getElementById('start').style.display='none';document.getElementById('main').style.display='';document.getElementById('navigation').style.display='';go(Math.min(S.scr,S.unlocked));}
-function showStart(){pausePlay();closeModal();log('interest_editor_open');document.getElementById('start').style.display='';document.getElementById('worldPreview').hidden=true;document.getElementById('mkst').textContent='';document.getElementById('main').style.display='none';document.getElementById('navigation').style.display='none';document.getElementById('steps').style.visibility='hidden';}
-document.getElementById('interest').addEventListener('input',function(){pendingWorld=null;document.getElementById('worldPreview').hidden=true;});
-document.getElementById('interest').addEventListener('keydown',function(e){if(e.key==='Enter')makeWorld();});
-
-/* ---------- maths (all numbers come from code) ---------- */
-function links(){return [S.noAB?[2]:[1,2],[2],S.trap?[2]:[0],[2]];}
-function P(){var l=links();return l.map(function(o){var r=[0,0,0,0];o.forEach(function(j){r[j]+=1/o.length});return r;});}
-function PH(){var a=S.alpha;return P().map(function(r){return r.map(function(x){return (1-a)*x+a/4;});});}
-function step(pi,m){var q=[0,0,0,0];for(var i=0;i<4;i++)for(var j=0;j<4;j++)q[j]+=pi[i]*m[i][j];return q;}
-function stationary(noAB){var o=S.noAB;if(noAB!==undefined)S.noAB=noAB;var m=PH(),pi=[.25,.25,.25,.25];for(var k=0;k<400;k++)pi=step(pi,m);S.noAB=o;return pi;}
+function note(k,html){return '<div class="note '+k+'">'+html+'</div>';}
 function f2(x){return x.toFixed(2);}
-function applyPreset(){var p=PRESET[S.scr];S.alpha=p.alpha;S.trap=p.trap;S.noAB=p.noAB;S.sel=0;S.start=0;S.whatif=false;resetIter();}
-function resetIter(){pausePlay();S.it=0;S.view=0;S.hist=[STARTS[S.start].slice()];}
-function currentPi(){if(S.scr===2)return S.hist[S.view];if(S.scr===1||S.scr===3)return stationary();return null;}
+function zeros(n){var a=[];for(var i=0;i<n;i++)a.push(0);return a;}
+function story(key){if(MODE!=='ai'||!WORLD.st)return '';return '<div class="story"><div class="lab">✨ '+(key==='intro'?'Let’s learn this with a story':'Your story')+'</div>'+tpl(WORLD.st[key])+'</div>';}
+function argmax(v){var b=0;for(var i=1;i<v.length;i++)if(v[i]>v[b])b=i;return b;}
+function rnd(v){return v.map(function(x){return +x.toFixed(4);});}
 
-/* ---------- graph ---------- */
-function edgeSvg(u,v,k,hl){
-  var col=hl?'#EF9F27':'var(--mut)',w=hl?2.2:1.2,s='';
-  if(u===v){var x=POS[u][0],y=POS[u][1];
-    s+='<path d="M'+(x+24)+' '+(y-14)+'C'+(x+86)+' '+(y-56)+' '+(x+86)+' '+(y+56)+' '+(x+26)+' '+(y+14)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" marker-end="url(#arr)"/>';
-    s+='<text x="'+(x+80)+'" y="'+(y+4)+'" text-anchor="middle" font-size="12" fill="var(--mut)">1</text>';return s;}
-  var a=POS[u],b=POS[v],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.sqrt(dx*dx+dy*dy),ux=dx/len,uy=dy/len;
-  var bi=(u===0&&v===2)||(u===2&&v===0),off=bi?26:0,px=-uy*off,py=ux*off;
-  var sx=a[0]+ux*27,sy=a[1]+uy*27,ex=b[0]-ux*31,ey=b[1]-uy*31,cx=(a[0]+b[0])/2+px,cy=(a[1]+b[1])/2+py;
-  s+='<path d="M'+sx+' '+sy+'Q'+cx+' '+cy+' '+ex+' '+ey+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" marker-end="url(#arr)"/>';
-  if(S.scr===0||hl){var mx=.25*sx+.5*cx+.25*ex+px*.2,my=.25*sy+.5*cy+.25*ey+py*.2;
-    s+='<text x="'+mx+'" y="'+(my+4)+'" text-anchor="middle" font-size="12" fill="var(--ink)">'+(k===1?'1':'1/'+k)+'</text>';}
-  return s;}
-function note(i,pi,ranks){
-  if(S.scr===0)return '';
-  if(!pi)return '';
-  var t=f2(pi[i]);if(S.scr===3)t='#'+ranks[i]+' · '+t;return t;}
-function drawGraph(){
-  var l=links(),e='',n='',pi=currentPi(),ranks=[];
-  if(pi){var ord=[0,1,2,3].sort(function(a,b){return pi[b]-pi[a];});ord.forEach(function(p,r){ranks[p]=r+1;});}
-  for(var u=0;u<4;u++)l[u].forEach(function(v){e+=edgeSvg(u,v,l[u].length,S.scr===0&&u===S.sel);});
-  for(var i=0;i<4;i++){var x=POS[i][0],y=POS[i][1],rad=26;if(pi&&S.scr!==0)rad=20+pi[i]*26;
-    var nt=note(i,pi,ranks);
-    var top=y<200,ly=top?y-rad-12:y+rad+22,vy=top?ly-17:ly+18,on=(S.scr===0&&i===S.sel)||(S.scr===2&&i===S.dest);
-    n+='<g class="node" role="button" tabindex="0" aria-label="Inspect '+nm(i)+'" onkeydown="graphKey(event,'+i+')" onclick="selPage('+i+')">'
-      +'<circle cx="'+x+'" cy="'+y+'" r="'+(rad+8)+'" fill="'+COL[i]+'" opacity="'+(on?.22:.1)+'"/>'
-      +'<circle cx="'+x+'" cy="'+y+'" r="'+rad+'" fill="'+COL[i]+'" stroke="'+(on?'var(--ink)':'var(--card)')+'" stroke-width="3"/>'
-      +'<text x="'+x+'" y="'+ly+'" text-anchor="middle" font-size="14" font-weight="650" fill="var(--ink)">'+nm(i)+'</text>'
-      +(nt?'<text x="'+x+'" y="'+vy+'" text-anchor="middle" font-size="12.5" font-weight="600" fill="'+COL[i]+'">'+nt+'</text>':'')+'</g>';}
-  document.getElementById('edges').innerHTML=e;document.getElementById('nodes').innerHTML=n;}
+/* ================= logging → study backend ================= */
+var LOG_ENDPOINT=params.get('logEndpoint')||'/api/log';
+var PID=params.get('pid')||('demo-'+Math.random().toString(36).slice(2,9)),T0=performance.now(),SEQ=0;
+function log(type,data){var ev={schemaVersion:3,seq:SEQ++,elapsedMs:Math.round(performance.now()-T0),iso:new Date().toISOString(),pid:PID,assignedCondition:assigned,mode:MODE,theme:THEME,narrativeSource:SOURCE,section:S?TABS[S.scr].id:null,type:type,data:data===undefined?null:data};
+ try{fetch(LOG_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev),keepalive:true}).catch(function(){});}catch(e){}}
 
-function cell(x){return x===0?'<span class="z">0</span>':'<b>'+(+x.toFixed(2))+'</b>';}
-function matHtml(m,label,sel){
-  var h='<table class="m click"><tr><th class="corner">from ↓ to →</th>';
-  N.forEach(function(c,ci){h+='<th>'+nm(ci)+'</th>';});h+='</tr>';
-  for(var r=0;r<4;r++){h+='<tr class="'+(r===sel?'sel':'')+'" tabindex="0" onclick="selPage('+r+')" onkeydown="graphKey(event,'+r+')"><th>'+nm(r)+'</th>';for(var c=0;c<4;c++)h+='<td>'+cell(m[r][c])+'</td>';h+='</tr>';}
-  return h+'</table>';}
-function bars(pi,sorted){
-  var idx=[0,1,2,3];if(sorted)idx.sort(function(a,b){return pi[b]-pi[a];});
-  return '<div class="bars">'+idx.map(function(i,r){return '<div class="bar">'+(sorted?'<span class="rk">'+(r+1)+'</span>':'')+'<span class="nm">'+nm(i)+'</span><span class="track"><i style="width:'+(pi[i]*100).toFixed(1)+'%;background:'+COL[i]+'"></i></span><span class="v">'+pi[i].toFixed(4)+'</span></div>';}).join('')+'</div>';}
+/* ================= state ================= */
+function newSim(n,start){var c=zeros(n);c[start]=1;return {n:n,pos:start,start:start,counts:c,steps:0,manual:0,last:null,ran:false,anim:null,fast:false};}
+function resetState(){
+ S={scr:0,unlocked:0,solved:[false,false,false,false,false,false],attempts:{},guess:null,sel:0,phase:0,reachPred:null,jumpPred:null,alpha:AFINAL};
+ SIM1=newSim(4,0);SIM4=newSim(5,0);
+ IT={start:0,hist:[],view:0,timer:null,stable:false,stableOnce:false};itReset(true);
+ FIN={hist:[],timer:null,done:false};}
+
+/* ================= world picker ================= */
+function detectTheme(t){var k=t.toLowerCase();
+ if(/batman|gotham|joker|superhero|comic|detective/.test(k))return 'batman';
+ if(/trip|travel|tast|street|foodie|restaurant|cuisine|tour/.test(k))return 'foodtrip';
+ if(/foot|soccer|sport|basket|match|team|ball/.test(k))return 'football';
+ if(/music|song|band|playlist|pop|rock|rap|spotify/.test(k))return 'music';
+ if(/cook|food|bak|recipe|kitchen|eat/.test(k))return 'cooking';
+ return 'custom';}
+function pick(t){$('interest').value=t;makeWorld();}
+function makeWorld(){var v=$('interest').value.trim();if(!v){$('mkst').textContent='Pick a world or type a topic.';return;}
+ var th=detectTheme(v);pendingWorld={w:th==='custom'?customWorld(v):WORLDS[th],theme:th,src:th==='custom'?'local-template':'prepared-story'};log('world_preview',{theme:th});
+ var el=$('worldPreview');el.hidden=false;
+ el.innerHTML='<div class="preview"><span class="tag">✨ Generated world</span><h3>'+esc(pendingWorld.w.title)+'</h3><p>'+esc(pendingWorld.w.st.intro)+'</p><div class="chips">'+pendingWorld.w.names.slice(0,4).map(function(n,i){return '<span class="cast"><i style="background:'+COL[i]+'"></i>'+esc(n)+'</span>';}).join('')+'</div><button class="b main" onclick="useWorld()">Start in this world →</button></div>';$('mkst').textContent='';}
+function useWorld(){if(!pendingWorld)return;WORLD=pendingWorld.w;SOURCE=pendingWorld.src;THEME=pendingWorld.theme;log('world_confirmed',{theme:THEME,source:SOURCE});startLesson();}
+function choosePath(m){if(assigned&&m!==assigned)return;stopAll();MODE=m;resetState();log('path_selected',{condition:m});$('welcome').hidden=true;
+ if(m==='ai'){$('start').style.display='';$('worldPreview').hidden=true;$('interest').value='';}else{WORLD=WORLDS.web;SOURCE='fixed';THEME='web';startLesson();}}
+function showChooser(){if(assigned)return;stopAll();closeModal();$('welcome').hidden=false;$('start').style.display='none';$('main').style.display='none';$('navigation').style.display='none';$('steps').style.visibility='hidden';}
+function startLesson(){$('start').style.display='none';$('main').style.display='';$('navigation').style.display='';go(0);}
+$('interest').addEventListener('input',function(){pendingWorld=null;$('worldPreview').hidden=true;});
+$('interest').addEventListener('keydown',function(e){if(e.key==='Enter')makeWorld();});
+
+/* ================= maths (all numbers come from code) ================= */
+function nv(){return S.scr>=4?5:4;}
+function outs(i,n){return LINKS[i].filter(function(j){return j<n;});}
+function Pm(n){var m=[];for(var i=0;i<n;i++){var o=outs(i,n),r=zeros(n);if(!o.length){for(var j=0;j<n;j++)r[j]=1/n;}else o.forEach(function(j){r[j]+=1/o.length;});m.push(r);}return m;}
+function PH(n,a){return Pm(n).map(function(r){return r.map(function(x){return (1-a)*x+a/n;});});}
+function stepV(v,m){var n=m.length,q=zeros(n);for(var i=0;i<n;i++)for(var j=0;j<n;j++)q[j]+=v[i]*m[i][j];return q;}
 function delta(a,b){return a.reduce(function(s,x,i){return s+Math.abs(x-b[i]);},0);}
-function plot(){var W=440,H=205,L=38,B=28,T=10,R=10,K=Math.max(10,S.it),s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Probability share by iteration. Current values also appear below.">';for(var g=0;g<=4;g++){var y=T+(H-T-B)*(1-g/4);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="var(--mut)">'+f2(g/4)+'</text>';}for(var p=0;p<4;p++){var d='';S.hist.forEach(function(v,k){var x=L+(W-L-R)*k/K,y=T+(H-T-B)*(1-v[p]);d+=(k?'L':'M')+x+' '+y;});s+='<path d="'+d+'" fill="none" stroke="'+COL[p]+'" stroke-width="2.2"/>';var cx=L+(W-L-R)*S.view/K,cy=T+(H-T-B)*(1-S.hist[S.view][p]);s+='<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="'+COL[p]+'"/>';}var cursor=L+(W-L-R)*S.view/K;s+='<line x1="'+cursor+'" x2="'+cursor+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--ink)" stroke-dasharray="3 4" opacity=".45"/>';for(var tick=0;tick<=4;tick++)s+='<text x="'+(L+(W-L-R)*tick/4)+'" y="'+(H-12)+'" text-anchor="middle" font-size="11" fill="var(--mut)">'+Math.round(K*tick/4)+'</text>';return s+'</svg>';}
-function studioReadout(){var oldCompare=document.getElementById('startCompare'),compareOpen=oldCompare&&oldCompare.open,oldCalc=document.getElementById('calcBox'),calcOpen=oldCalc&&oldCalc.open;var cur=S.hist[S.view],prev=S.view?S.hist[S.view-1]:cur,m=PH(),next=S.view?cur:step(cur,m),diff=S.view?delta(cur,prev):null;var h=plot()+'<div class="legend">'+N.map(function(n,i){return '<span style="color:'+COL[i]+'">'+nm(i)+'</span>';}).join('')+'</div><div class="statusline"><span>Iteration <b>'+S.view+'</b></span><span>Total mass <b>'+cur.reduce(function(a,b){return a+b;},0).toFixed(4)+'</b></span><span>L1 change <b>'+(diff===null?'—':diff.toFixed(6))+'</b></span></div>'+bars(cur,false);h+='<div class="note '+(diff!==null&&diff<TOL?'ok':'info')+'">'+(diff===null?'Start vector: predict which share changes first.':diff<TOL?'Below the 0.0001 stopping tolerance. This is an approximation to the stationary distribution.':'Still moving: compare each new share with the previous one. We stop when L1 change is below 0.0001.')+'</div>';h+='<details class="calc" id="calcBox"'+(calcOpen?' open':'')+'><summary>'+(S.view?'How iteration '+S.view+' was calculated':'How the first update works')+'</summary><p class="small">Row vector update: v<sub>next</sub> = v P̂. Select a destination to inspect incoming contributions.</p><label>Destination <select id="calcDest" onchange="setDest(+this.value)">'+N.map(function(n,i){return '<option value="'+i+'"'+(i===S.dest?' selected':'')+'>'+nm(i)+'</option>';}).join('')+'</select></label><div class="scroll-table"><table class="m"><tr><th>From</th><th>Previous share</th><th>To '+nm(S.dest)+'</th><th>Contribution</th></tr>'+N.map(function(n,i){return '<tr><th>'+nm(i)+'</th><td>'+prev[i].toFixed(4)+'</td><td>'+m[i][S.dest].toFixed(4)+'</td><td>'+(prev[i]*m[i][S.dest]).toFixed(5)+'</td></tr>';}).join('')+'</table></div><p><b>Sum → '+nm(S.dest)+': '+next[S.dest].toFixed(5)+'</b></p><p class="small">Displayed terms are rounded; calculations use full precision. P̂ = (1 − α)P + (α/4)J. α is jump probability.</p></details>';h+='<details class="calc" id="startCompare"'+(compareOpen?' open':'')+'><summary>Compare all four starts at iteration '+S.view+'</summary><div class="scroll-table"><table class="m compare"><tr><th>Start</th>'+N.map(function(n,i){return '<th>'+nm(i)+'</th>';}).join('')+'</tr>'+STARTS.map(function(start,i){var v=start.slice();for(var k=0;k<S.view;k++)v=step(v,m);return '<tr><th>'+['Equal',nm(0)+' only',nm(2)+' only',nm(3)+' only'][i]+'</th>'+v.map(function(x){return '<td>'+x.toFixed(4)+'</td>';}).join('')+'</tr>';}).join('')+'</table></div><p class="small">'+(S.alpha>0?'With positive uniform jumps, all starts approach the same stationary distribution. Early values can differ.':'Without jumps, convergence from all starts is not guaranteed for arbitrary graphs.')+'</p></details>';document.getElementById('readout').innerHTML=h;var slider=document.getElementById('historySlider');if(slider){slider.max=S.it;slider.value=S.view;slider.disabled=S.it===0;document.getElementById('historyLabel').textContent=S.view+' / '+S.it;}var play=document.getElementById('playButton');if(play)play.textContent=playTimer?'Pause':'Play';}
+var STCACHE={};
+function stationary(n,a){var key=n+':'+a;if(STCACHE[key])return STCACHE[key];var m=PH(n,a),v=zeros(n).map(function(){return 1/n;});for(var k=0;k<3000;k++)v=stepV(v,m);return STCACHE[key]=v;}
 
-function readout(){
-  var el=document.getElementById('readout');if(!el)return;
-  if(S.scr===0){
-    var m=P(),rs=m[S.sel].reduce(function(a,b){return a+b;},0);
-    var out=links()[S.sel],k=out.length;el.innerHTML=matHtml(m,'P',S.sel)+'<div class="note info">From <b>'+nm(S.sel)+'</b> there '+(k===1?'is <b>1 link</b>':'are <b>'+k+' links</b>')+' (→ '+out.map(nm).join(', ')+'), so '+(k===1?'it gets <b>1</b>':'each gets <b>1/'+k+'</b>')+'. The row adds up to 1.</div><p class="small">Only where you are now matters, not where you came from.</p>';
-  }else if(S.scr===1){
-    var pi=stationary(),h=bars(pi,false);
-    if(S.trap&&S.alpha===0)h+='<div class="note bad"><b>Rank sink.</b> '+tpl(WORLD.sink)+'</div>';
-    else if(!S.trap&&S.alpha===0)h+='<div class="note warn"><b>Unreachable.</b> '+tpl(WORLD.unreach)+'</div>';
-    else h+='<div class="note ok">'+tpl(WORLD.ok)+' With α = '+f2(S.alpha)+' every entry is at least α/N = '+(S.alpha/4).toFixed(4)+'.</div>';
-    el.innerHTML=h;
-  }else if(S.scr===2){studioReadout();
-  }else{
-    var pi4=stationary(),base=stationary(false),h3=bars(pi4,true);
-    if(S.whatif){var d=pi4.map(function(v,i){return nm(i)+' '+(v-base[i]>=0?'+':'')+f2(v-base[i]);}).join(' · ');h3+='<div class="note info">Change in π: '+d+'.</div>';}
-    el.innerHTML=h3;}}
-function startNames(){return ['Equal start','Start on '+nm(0),'Start on '+nm(2),'Start on '+nm(3)];}
+/* ================= random surfer simulation ================= */
+function simMove(sim,j){sim.last=[sim.pos,j];sim.pos=j;sim.counts[j]++;sim.steps++;}
+function simRand(sim,a){var o=outs(sim.pos,sim.n),j;if(Math.random()<a||!o.length)j=Math.floor(Math.random()*sim.n);else j=o[Math.floor(Math.random()*o.length)];simMove(sim,j);}
+function shares(sim){var t=sim.counts.reduce(function(a,b){return a+b;},0);return sim.counts.map(function(c){return t?c/t:0;});}
+function simRun(sim,total,a,done){stopAll();sim.fast=true;var k=0,per=Math.ceil(total/50);
+ var f=function(){for(var i=0;i<per&&k<total;i++,k++)simRand(sim,a);refresh();
+  if(k<total)sim.anim=requestAnimationFrame(f);else{sim.anim=null;sim.fast=false;sim.last=null;sim.ran=true;if(done)done();}};
+ sim.anim=requestAnimationFrame(f);}
+function stopAll(){[SIM1,SIM4].forEach(function(s){if(s&&s.anim){cancelAnimationFrame(s.anim);s.anim=null;s.fast=false;}if(s&&s.tmo){clearTimeout(s.tmo);s.tmo=null;}if(s)s.playing=false;});
+ if(IT&&IT.timer){clearInterval(IT.timer);IT.timer=null;}if(FIN&&FIN.timer){clearInterval(FIN.timer);FIN.timer=null;}}
 
-function drawPanel(){
-  var c=FOCUS[S.scr],h='<span class="tag">'+c.tag+'</span><h2>'+c.title+'</h2><div class="mut">'+c.text+'</div>';
-  h+='<div class="story"><div class="lab">'+(MODE==='ai'?'Your story':'The idea')+'</div>'+tpl(WORLD['s'+(S.scr+1)])+'</div>';
+/* ================= section actions ================= */
+function setGuess(i){S.guess=i;log('predict_top',{node:L[i]});refresh();}
+var SLOW=8,TOTAL=1000;
+function s1Play(){stopAll();SIM1=newSim(4,0);SIM1.playing=true;log('surfer_play');refresh();var k=0;
+ var hop=function(){if(k<SLOW){simRand(SIM1,0);k++;refresh();SIM1.tmo=setTimeout(hop,k<4?750:450);}
+  else{SIM1.tmo=null;simRun(SIM1,TOTAL-SLOW,0,function(){SIM1.playing=false;log('surfer_result',{shares:rnd(shares(SIM1)),guess:L[S.guess]});refresh();});}};
+ SIM1.tmo=setTimeout(hop,600);}
+function selNode(i){S.sel=i;log('prob_select',{node:L[i]});refresh();}
+function itReset(silent){if(IT.timer){clearInterval(IT.timer);IT.timer=null;}var v;
+ if(IT.start===0)v=[.25,.25,.25,.25];else if(IT.start===1)v=[1,0,0,0];else{v=[0,0,0,0].map(function(){return Math.random()+.05;});var t=v.reduce(function(a,b){return a+b;},0);v=v.map(function(x){return x/t;});}
+ IT.hist=[v];IT.view=0;IT.stable=false;if(!silent){log('iter_reset',{start:['uniform','allA','random'][IT.start]});refresh();}}
+function itStart(k){IT.start=k;itReset();}
+function itAdvance(){var m=PH(4,0),last=IT.hist[IT.hist.length-1],nx=stepV(last,m);IT.hist.push(nx);IT.view=IT.hist.length-1;
+ if(delta(nx,last)<TOL&&!IT.stable){IT.stable=true;IT.stableOnce=true;log('stable_reached',{start:['uniform','allA','random'][IT.start],steps:IT.view,values:rnd(nx)});}}
+function itStep(){if(IT.stable)return;if(IT.timer){clearInterval(IT.timer);IT.timer=null;}itAdvance();log('iter_step',{step:IT.view});refresh();}
+function itRun(){if(IT.timer||IT.stable)return;log('iter_run',{from:IT.view});
+ IT.timer=setInterval(function(){itAdvance();if(IT.stable||IT.hist.length>MAXIT){clearInterval(IT.timer);IT.timer=null;}refresh();},70);refresh();}
+function s4Run(){if(SIM4.anim)return;SIM4=newSim(5,0);log('unreach_run',{steps:1000});
+ simRun(SIM4,1000,0,function(){log('unreach_result',{shares:rnd(shares(SIM4))});drawPanel();refresh();});refresh();}
+function s4Next(){S.phase=1;log('damping_intro');drawPanel();refresh();var t=$('s4b');if(t&&t.scrollIntoView)t.scrollIntoView({behavior:'smooth',block:'start'});}
+function setAlpha(v){S.alpha=Math.round(+v*100)/100;$('albadge').textContent=f2(S.alpha);refresh();}
+function finRun(){if(FIN.timer)return;FIN.hist=[[.2,.2,.2,.2,.2]];FIN.done=false;log('final_run');var m=PH(5,AFINAL);
+ FIN.timer=setInterval(function(){var last=FIN.hist[FIN.hist.length-1],nx=stepV(last,m);FIN.hist.push(nx);
+  if(delta(nx,last)<TOL||FIN.hist.length>MAXIT){clearInterval(FIN.timer);FIN.timer=null;FIN.done=true;log('final_result',{values:rnd(nx),guess:L[S.guess]});}refresh();},90);refresh();}
 
-  if(S.scr===1)h+='<div class="ctrl"><label class="sw"><input type="checkbox" id="tr"'+(S.trap?' checked':'')+' onchange="setTrap(this.checked)"><span class="knob"></span><span>'+nm(2)+' only leads to itself</span></label>'
-    +'<div class="ctrl-row"><span>Jump probability <b>α</b></span><span class="badge" id="alv">'+f2(S.alpha)+'</span></div>'
-    +'<input type="range" id="al" min="0" max="1" step="0.05" value="'+S.alpha+'" oninput="setAlpha(this.value)" onchange="log(\'alpha_set\',this.value)">'
-    +'<div class="presets">'+[0,0.15,0.5,0.9].map(function(v){return '<button class="b sm'+(S.alpha===v?' on':'')+'" onclick="setAlphaP('+v+')">α = '+v+'</button>';}).join('')+'</div></div>';
-  if(S.scr===2)h+='<div class="ctrl"><div class="row" style="margin:0"><label class="small">Start <select onchange="setStart(+this.value)">'+startNames().map(function(n,i){return '<option value="'+i+'"'+(S.start===i?' selected':'')+'>'+n+'</option>';}).join('')+'</select></label><label class="small">Jumps <select onchange="setStudioAlpha(+this.value)"><option value="0.15"'+(S.alpha===0.15?' selected':'')+'>α = 0.15</option><option value="0"'+(S.alpha===0?' selected':'')+'>α = 0 (links only)</option></select></label></div>'
-    +'<div class="row"><button class="b main" onclick="advance(1)">Next iteration</button><button class="b" id="playButton" onclick="togglePlay()">Play</button><button class="b" onclick="runSettled()">Run until settled</button><button class="b ghost" onclick="log(\'iter_reset\');resetIter();refresh()">Reset</button></div>'
-    +'<div class="slider-wrap"><label class="progress-label" for="historySlider"><span>Scrub through the iterations</span><span id="historyLabel">0 / 0</span></label><input id="historySlider" type="range" min="0" max="0" value="0" disabled oninput="seek(+this.value)"></div></div>';
-  if(S.scr===3)h+='<p class="small">Extension: predict a link change before applying it.</p><div class="row"><button class="b main" onclick="openPredict()">'+tpl(WORLD.whatifBtn)+'</button>'+(S.whatif?'<button class="b" onclick="undoWhat()">Restore original links</button>':'')+'</div><div id="prediction"></div>';
-  h+='<div id="readout"></div>';
-  document.getElementById('panel').innerHTML=h;}
+/* ================= graph ================= */
+function vals(){switch(S.scr){
+ case 1:return SIM1.steps?shares(SIM1):null;
+ case 3:return IT.hist[IT.view];
+ case 4:return S.phase>=1?stationary(5,S.alpha):(SIM4.steps?shares(SIM4):null);
+ case 5:return FIN.hist.length?FIN.hist[FIN.hist.length-1]:null;}return null;}
+function rad(i,v){return v?16+Math.min(v[i],.6)*58:24;}
+function edge(u,w,ru,rw,hl,lab){var a=POS[u],b=POS[w],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.sqrt(dx*dx+dy*dy),ux=dx/len,uy=dy/len,bi=LINKS[w].indexOf(u)>=0,off=bi?24:0,px=-uy*off,py=ux*off;
+ var sx=a[0]+ux*(ru+4)+px*.3,sy=a[1]+uy*(ru+4)+py*.3,ex=b[0]-ux*(rw+7)+px*.3,ey=b[1]-uy*(rw+7)+py*.3,cx=(a[0]+b[0])/2+px,cy=(a[1]+b[1])/2+py;
+ var s='<path d="M'+sx.toFixed(1)+' '+sy.toFixed(1)+'Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+ex.toFixed(1)+' '+ey.toFixed(1)+'" fill="none" style="stroke:'+(hl?'var(--hl)':'var(--edge)')+'" stroke-width="'+(hl?2.6:1.4)+'" marker-end="url(#'+(hl?'arrh':'arr')+')"/>';
+ if(lab)s+='<text x="'+(.25*sx+.5*cx+.25*ex).toFixed(1)+'" y="'+(.25*sy+.5*cy+.25*ey+4).toFixed(1)+'" text-anchor="middle" font-size="14" font-weight="700" style="fill:'+(hl?'var(--hl)':'var(--ink)')+';stroke:var(--card);stroke-width:5px;paint-order:stroke">'+lab+'</text>';
+ return s;}
+function drawGraph(){
+ var n=nv(),v=vals(),e='',nd='',ranks=null,i,pct=S.scr===1||(S.scr===4&&S.phase===0),sim=S.scr===1?SIM1:(S.scr===4&&S.phase===0?SIM4:null);
+ if(S.scr===5&&FIN.done){var ord=v.map(function(x,k){return k;}).sort(function(a,b){return v[b]-v[a];});ranks=[];ord.forEach(function(p,r){ranks[p]=r+1;});}
+ for(var u=0;u<n;u++){var o=outs(u,n);o.forEach(function(w){
+  var walked=sim&&!sim.fast&&sim.last&&sim.last[0]===u&&sim.last[1]===w,sel=S.scr===2&&u===S.sel;
+  e+=edge(u,w,rad(u,v),rad(w,v),walked||sel,S.scr===2?(o.length===1?'1':'1/'+o.length):'');});}
+ for(i=0;i<n;i++){var x=POS[i][0],y=POS[i][1],r=rad(i,v),top=y<200,ly=top?y-r-12:y+r+22,vy=top?ly-18:ly+19;
+  var on=(S.scr===0&&i===S.guess)||(S.scr===2&&i===S.sel),t='';
+  if(v){t=pct?Math.round(v[i]*100)+'%':f2(v[i]);if(ranks)t='#'+ranks[i]+' · '+t;}
+  nd+='<g class="node" role="button" tabindex="0" aria-label="'+nm(i)+'" onkeydown="graphKey(event,'+i+')" onclick="nodeClick('+i+')">'
+   +(i===4?'<circle cx="'+x+'" cy="'+y+'" r="'+(r+16)+'" fill="none" style="stroke:var(--mut)" stroke-dasharray="4 5" opacity=".7"/>':'')
+   +'<circle cx="'+x+'" cy="'+y+'" r="'+(r+8)+'" fill="'+COL[i]+'" opacity="'+(on?.28:.1)+'"/>'
+   +'<circle class="core" cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+COL[i]+'" style="stroke:'+(on?'var(--ink)':'var(--card)')+'" stroke-width="3"/>'
+   +'<text x="'+x+'" y="'+ly+'" text-anchor="middle" font-size="15" font-weight="650" style="fill:var(--ink)">'+nm(i)+'</text>'
+   +(t?'<text x="'+x+'" y="'+vy+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+COL[i]+'">'+t+'</text>':'')+'</g>';}
+ $('edges').innerHTML=e;$('nodes').innerHTML=nd;
+ var sf=$('surfer');if(sim){var p=POS[sim.pos],rr=rad(sim.pos,v);sf.style.display='';sf.classList.toggle('fast',sim.fast);sf.style.transform='translate('+(p[0]+rr*.72)+'px,'+(p[1]-rr*.72)+'px)';}else sf.style.display='none';
+ $('g').setAttribute('viewBox',n===5?'20 10 690 350':'20 10 490 350');}
+function graphKey(e,i){if(e.key==='Enter'||e.key===' '){e.preventDefault();nodeClick(i);}}
+function nodeClick(i){if(S.scr===0&&i<4)setGuess(i);else if(S.scr===2&&i<4)selNode(i);}
 
-/* ---------- quick-check pop-up ---------- */
-var lastFocus=null;
-function fb(k,t){document.getElementById('fb').innerHTML='<div class="note '+k+'">'+t+'</div>';}
-function renderCheck(){
-  document.getElementById('mtag').textContent=(S.scr===1?'Extension check':'Quick check')+' · '+(S.scr+1)+' of 4';
-  document.getElementById('mq').innerHTML=tpl(QUESTIONS[S.scr]);
-  document.getElementById('mopts').innerHTML=OPTS[S.scr].map(function(o,i){return '<label class="opt"><input type="radio" name="ans" value="'+i+'"><span>'+tpl(o)+'</span></label>';}).join('');
-  document.getElementById('fb').innerHTML='';document.getElementById('mafter').innerHTML='';
-  document.getElementById('msubmitRow').hidden=false;
-  if(S.solved[S.scr])showCorrect(true);}
-function openCheck(){pausePlay();lastFocus=document.activeElement;renderCheck();document.getElementById('modal').hidden=false;document.body.classList.add('lock');log('check_open',{q:S.scr+1});var f=document.querySelector('#modal input')||document.querySelector('#modal button.main');if(f)f.focus();}
-function closeModal(){var m=document.getElementById('modal');if(m.hidden)return false;m.hidden=true;document.body.classList.remove('lock');return true;}
-function closeCheck(){if(closeModal()){log('check_close',{q:S.scr+1,solved:S.solved[S.scr]});if(lastFocus&&lastFocus.focus)lastFocus.focus();}}
-function doCheck(){
-  var c=document.querySelector('#modal input[name=ans]:checked');
-  if(!c){fb('warn','Choose an answer first.');return;}
-  var v=+c.value,right=v===CORRECT[S.scr];S.attempts[S.scr]++;
-  log('check',{q:S.scr+1,answer:v,correct:right,attempt:S.attempts[S.scr]});
-  if(right){S.solved[S.scr]=true;if(S.scr<3)S.unlocked=Math.max(S.unlocked,S.scr+1);drawSteps();drawPanel();refresh();showCorrect(false);}
-  else{var idk=v===OPTS[S.scr].length-1;
-    document.getElementById('fb').innerHTML='<div class="hint"><span class="bot" aria-hidden="true">'+(MODE==='ai'?'🤖':'💡')+'</span><div><b>'+(idk?'Explore a little, then try again. ':'Not quite. ')+(MODE==='ai'?'Here\u2019s a hint from your tutor:':'Here\u2019s a hint:')+'</b><br>'+tpl(HINTS[S.scr])+'</div></div>';}}
-function showCorrect(earlier){
-  fb('ok',earlier?'You answered this correctly earlier.':'Correct!');
-  document.getElementById('msubmitRow').hidden=true;
-  var r=document.querySelector('#modal input[value="'+CORRECT[S.scr]+'"]');if(r)r.checked=true;
-  document.querySelectorAll('#modal input[name=ans]').forEach(function(x){x.disabled=true;x.parentNode.classList.add('disabled');});
-  document.getElementById('mafter').innerHTML='<div class="calc"><b>Takeaway.</b> '+TAKEAWAYS[S.scr]+'</div><div class="row">'+(S.scr<3?'<button class="b main" onclick="continueNext()">Continue to step '+(S.scr+2)+'</button>':'<button class="b main" onclick="finishLesson()">Finish activity</button>')+'<button class="b" onclick="closeCheck()">Stay on this step</button></div>';
-  var btn=document.querySelector('#mafter button.main');if(btn)btn.focus();}
-function continueNext(){log('check_continue',{q:S.scr+1});closeModal();go(S.scr+1);}
-function finishLesson(){pausePlay();log('lesson_complete',{checks:S.solved.slice(),attempts:S.attempts.slice(),source:SOURCE,theme:THEME});document.getElementById('mafter').innerHTML='<div class="finish"><b>Activity complete.</b> Explain the idea once without the story: links move probability, repeated updates settle into visit shares, and those shares define the ranking. Continue to the separate post-test.</div><div class="row"><button class="b main" onclick="closeCheck()">Close</button></div>';}
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!document.getElementById('modal').hidden)closeCheck();});
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeCheck();});
+/* ================= panel widgets ================= */
+function barsHtml(v,o){o=o||{};var idx=v.map(function(x,i){return i;});if(o.sorted)idx.sort(function(a,b){return v[b]-v[a];});
+ return '<div class="bars">'+idx.map(function(i,r){return '<div class="bar'+(o.sorted?' ranked':'')+'">'+(o.sorted?'<span class="rk">'+(r+1)+'</span>':'')+'<span class="nm"><i class="dot" style="background:'+COL[i]+'"></i>'+nm(i)+'</span><span class="track"><i style="width:'+(v[i]*100).toFixed(1)+'%;background:'+COL[i]+'"></i></span><span class="v">'+f2(v[i])+'</span></div>';}).join('')+'</div>';}
+function visitsTable(sim){if(!sim.steps)return '';var sh=shares(sim),h='<table class="vt"><tr><th>'+tpl('{Unit}')+'</th><th>Visits</th><th>Share</th></tr>';
+ for(var i=0;i<sim.n;i++)h+='<tr><td><i class="dot" style="background:'+COL[i]+'"></i>'+nm(i)+'</td><td>'+sim.counts[i]+'</td><td>'+(sh[i]*100).toFixed(1)+'%</td></tr>';return h+'</table>';}
+function matrixHtml(){var m=Pm(4),h='<table class="m"><tr><th class="corner">from ↓ to →</th>';for(var c=0;c<4;c++)h+='<th>'+nm(c)+'</th>';h+='</tr>';
+ for(var r=0;r<4;r++){h+='<tr'+(r===S.sel?' class="sel"':'')+' onclick="selNode('+r+')"><th>'+nm(r)+'</th>';for(c=0;c<4;c++){var x=m[r][c];h+='<td>'+(x===0?'<span class="z">0</span>':'<b>'+(x===1?'1':'1/'+Math.round(1/x))+'</b>')+'</td>';}h+='</tr>';}return h+'</table>';}
+function plot(){var W=440,H=190,Lm=36,B=24,T=10,R=10,K=Math.max(20,IT.hist.length-1),s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Values per step">';
+ for(var g=0;g<=4;g++){var y=T+(H-T-B)*(1-g/4);s+='<line x1="'+Lm+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line)"/><text x="'+(Lm-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" style="fill:var(--mut)">'+(g/4).toFixed(2)+'</text>';}
+ for(var p=0;p<4;p++){var d='';for(var k=0;k<=IT.view;k++){var x=Lm+(W-Lm-R)*k/K,yy=T+(H-T-B)*(1-IT.hist[k][p]);d+=(k?'L':'M')+x.toFixed(1)+' '+yy.toFixed(1);}s+='<path d="'+d+'" fill="none" stroke="'+COL[p]+'" stroke-width="2.4" stroke-linejoin="round"/>';}
+ for(var t=0;t<=4;t++)s+='<text x="'+(Lm+(W-Lm-R)*t/4)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" style="fill:var(--mut)">'+Math.round(K*t/4)+'</text>';
+ return s+'</svg>';}
+function optBtns(list,picked,fn,locked){return '<div class="opts">'+list.map(function(o,i){return '<button class="opt'+(picked===i?' on':'')+'"'+(locked?' disabled':'')+' onclick="'+fn+'('+i+')">'+tpl(o)+'</button>';}).join('')+'</div>';}
 
-/* ---------- prediction (step 4) ---------- */
-function openPredict(){document.getElementById('prediction').innerHTML='<div class="calc"><b>Predict first: if '+nm(0)+' stops linking to '+nm(1)+', what happens to '+nm(1)+'\u2019s rank?</b><div class="row"><button class="b" onclick="predict(0)">It rises</button><button class="b" onclick="predict(1)">It stays equal</button><button class="b" onclick="predict(2)">It falls</button></div></div>';log('prediction_open');}
-function predict(i){S.noAB=true;S.whatif=true;var base=stationary(false),now=stationary();log('prediction',{choice:i,correct:i===2,before:base[1],after:now[1]});drawPanel();document.getElementById('prediction').innerHTML='<div class="note '+(i===2?'ok':'info')+'" id="predictResult">'+(i===2?'Your prediction matches. ':nm(1)+'\u2019s rank falls. ')+nm(1)+' loses its only incoming link and receives only uniform-jump mass.<br>'+nm(1)+': '+base[1].toFixed(4)+' → '+now[1].toFixed(4)+'.</div>';refresh();}
-function undoWhat(){log('whatif_undo');S.noAB=false;S.whatif=false;drawPanel();refresh();}
+/* ================= sections ================= */
+function drawPanel(){var h='';switch(S.scr){
+ case 0:
+  h='<h2>Do you know how Google decides which websites matter more?</h2>'+story('intro')
+   +'<div class="ctrl"><div class="ctrl-h">Your guess</div><p>'+tpl('Following the arrows, which {unit} gets visited most?')+'</p><div class="chips" id="guessChips"></div></div>';break;
+ case 1:
+  h='<h2>The random surfer</h2><p>'+tpl('At every step, {surfer} follows a random {link}.')+'</p>'+story('surfer')
+   +'<div id="s1stat"></div><div id="s1bars"></div><div id="s1res"></div>';break;
+ case 2:
+  h='<h2>Links become probabilities</h2><p>'+tpl('k {links} out → each gets 1/k.')+'</p>'+story('prob')
+   +'<div id="pex"></div><div id="pmat"></div>';break;
+ case 3:
+  h='<h2>PageRank values converge</h2><p>'+tpl('Each step, every {unit} passes its share along its {links}.')+'</p>'+story('conv')
+   +'<div class="ctrl"><div class="row" style="margin-top:0"><span class="small">Start</span><div class="seg" id="s3seg"></div></div><div class="row" style="margin-bottom:0"><button class="b" onclick="itStep()">Next step</button><button class="b main" onclick="itRun()">Run until stable ▶</button><button class="b ghost" onclick="itReset()">Reset</button></div></div>'
+   +'<div id="s3plot"></div><div id="s3stat"></div><div id="s3bars"></div><div id="s3after"></div>';break;
+ case 4:
+  h='<h2>'+tpl('A new {unit}: {E}')+'</h2>'+story('unreach')
+   +'<p>'+tpl('Can the surfer reach {E} by only following {links}?')+'</p><div id="s4table"></div><div id="s4res"></div>';
+  if(S.phase>=1){
+   h+='<h3 id="s4b">Add random jumps (damping)</h3><p>'+tpl('With probability α, {surfer} {jump}.')+'</p>'+story('jump')
+    +'<div class="ctrl"><div class="ctrl-row"><span>Damping value <b>α</b></span><span class="badge" id="albadge">'+f2(S.alpha)+'</span></div><input type="range" id="al" min="0" max="1" step="0.05" value="'+S.alpha+'" aria-label="Damping value alpha" oninput="setAlpha(this.value)" onchange="log(\'alpha_set\',{alpha:S.alpha})"><div class="ticks"><span>0 · never jump</span><span>1 · always jump</span></div></div>'
+    +'<p class="small" style="margin-bottom:0">Stable values with this α:</p><div id="s4bars"></div><div id="s4note"></div>'
+    +'<details class="calc"><summary>The model behind it</summary><div class="formula">P̂ = (1 − α) P + (α / N) J</div><p class="small">'+tpl('Follow a {link} (P) with 1 − α, jump anywhere (J) with α. Typical α = 0.15.')+'</p></details>';}
+  break;
+ case 5:
+  h='<h2>Final PageRank result</h2><p>α = 0.15</p>'+story('final')
+   +'<div class="row"><button class="b main" id="finrun" onclick="finRun()">Run until stable ▶</button></div><div id="finbars"></div><div id="finres"></div>';break;}
+ $('panel').innerHTML=h;}
 
-/* ---------- interaction ---------- */
-function graphKey(e,i){if(e.key==='Enter'||e.key===' '){e.preventDefault();selPage(i);}}
-function selPage(i){if(S.scr===0){S.sel=i;log('page_click',N[i]);refresh();}else if(S.scr===2){setDest(i);}}
-function setDest(i){S.dest=i;log('contribution_destination',N[i]);refresh();}
-function setAlpha(v){S.alpha=+v;document.getElementById('alv').textContent=f2(S.alpha);document.querySelectorAll('.presets .b').forEach(function(b){b.classList.toggle('on',+b.textContent.split('= ')[1]===S.alpha);});refresh();}
-function setAlphaP(v){document.getElementById('al').value=v;log('alpha_set',v);setAlpha(v);}
-function setTrap(b){log('trap_toggle',b);S.trap=b;refresh();}
-function setStart(i){log('start_pick',i);S.start=i;resetIter();drawPanel();refresh();}
-function pausePlay(){if(playTimer){clearInterval(playTimer);playTimer=null;}var b=document.getElementById('playButton');if(b)b.textContent='Play';}
-function iter(k){var m=PH();for(var j=0;j<k;j++){if(S.view<S.it){S.view++;}else if(S.it<MAX_ITER){S.hist.push(step(S.hist[S.it],m));S.it++;S.view=S.it;}else break;}refresh();}
-function advance(k){pausePlay();log('iterate',{steps:k,from:S.view});iter(k);}
-function seek(k){pausePlay();S.view=Math.max(0,Math.min(S.it,k));log('history_seek',S.view);refresh();}
-function setStudioAlpha(a){S.alpha=a;log('studio_alpha',a);resetIter();drawPanel();refresh();}
-function togglePlay(){if(playTimer){pausePlay();log('play_pause');return;}if(S.view>=MAX_ITER){resetIter();}log('play_start');playTimer=setInterval(function(){if(S.scr!==2){pausePlay();return;}iter(1);if(S.view>=MAX_ITER||(S.view>0&&delta(S.hist[S.view],S.hist[S.view-1])<TOL)){pausePlay();log('play_stopped',{iteration:S.view});refresh();}},550);refresh();}
-function runSettled(){pausePlay();log('run_until_settled',{from:S.view});do{iter(1);}while(S.view<MAX_ITER&&(S.view===0||delta(S.hist[S.view],S.hist[S.view-1])>=TOL));log('settled_result',{iteration:S.view,delta:delta(S.hist[S.view],S.hist[S.view-1])});}
-function refresh(){drawGraph();readout();}
+function live(){var el,i;
+ if(el=$('guessChips'))el.innerHTML=[0,1,2,3].map(function(i){return '<button class="b'+(S.guess===i?' on':'')+'" onclick="setGuess('+i+')"><i class="dot" style="background:'+COL[i]+';margin-right:6px"></i>'+nm(i)+'</button>';}).join('');
+  if(el=$('s1stat'))el.innerHTML='<div class="statusline"><span>Step <b>'+SIM1.steps+'</b> / '+TOTAL+'</span><span class="'+(SIM1.ran?'okc':'')+'">'+(SIM1.ran?'Done ✓':SIM1.fast?'Speeding up…':'Watching…')+'</span></div><div class="prog"><i style="width:'+(SIM1.steps/TOTAL*100).toFixed(1)+'%"></i></div>';
+ if(el=$('s1bars'))el.innerHTML=SIM1.steps?barsHtml(shares(SIM1)):'';
+ if(el=$('s1res')){var r='';if(SIM1.ran&&!SIM1.playing){var good=S.guess===0||S.guess===2;
+   r=note(good?'ok':'info',(good?'Good guess. ':tpl('You guessed {'+L[S.guess]+'}. '))+tpl('{A} and {C} lead, ~40% each. {D}: 0.'))
+    +'<div class="row"><button class="b ghost" onclick="s1Play()">↻ Replay</button></div>';}el.innerHTML=r;}
+ if(el=$('pex')){var po=outs(S.sel,4),pk=po.length;el.innerHTML=note('info','<b>Example:</b> '+nm(S.sel)+' has '+pk+' '+tpl(pk===1?'{link}':'{links}')+' out → '+(pk===1?'probability 1':'each 1/'+pk)+'.');}
+ if(el=$('pmat'))el.innerHTML=matrixHtml();
+ if(el=$('s3seg'))el.innerHTML=['Spread evenly','100% on {A}','Random'].map(function(t,i){return '<button class="'+(IT.start===i?'on':'')+'" onclick="itStart('+i+')">'+tpl(t)+'</button>';}).join('');
+ if(el=$('s3plot'))el.innerHTML=plot();
+ if(el=$('s3stat'))el.innerHTML='<div class="statusline"><span>Step <b>'+IT.view+'</b></span><span class="'+(IT.stable?'okc':'')+'">'+(IT.view===0?'Start':IT.stable?'Stable ✓':'Still changing')+'</span></div>';
+ if(el=$('s3bars'))el.innerHTML=barsHtml(IT.hist[IT.view]);
+ if(el=$('s3after'))el.innerHTML=IT.stableOnce?note('ok','Stable. Try another start: same result.'):'';
+ if(el=$('s4table'))el.innerHTML=SIM4.steps?barsHtml(shares(SIM4)):'';
+ if(el=$('s4res')){var r4='';if(SIM4.ran&&!SIM4.anim){r4=note('bad',tpl('{E}: 0 visits. No {link} leads in.'))
+   +(S.phase===0?'<div class="row"><button class="b main" onclick="s4Next()">Add random jumps →</button></div>':'');}el.innerHTML=r4;}
+ if(el=$('s4bars'))el.innerHTML=barsHtml(stationary(5,S.alpha));
+ if(el=$('s4note'))el.innerHTML=S.alpha===0?note('bad',tpl('No jumps: {E} and {D} get 0.')):S.alpha>=0.8?note('info','Mostly jumping: values nearly equal.'):note('ok',tpl('Everyone gets a share, even {E}.'));
+ if(el=$('finrun')){el.disabled=!!FIN.timer;el.textContent=FIN.done?'Run again ▶':'Run until stable ▶';}
+ if(el=$('finbars'))el.innerHTML=FIN.hist.length?barsHtml(FIN.hist[FIN.hist.length-1],{sorted:FIN.done}):'';
+ if(el=$('finres')){var fr='';if(FIN.done){var fv=FIN.hist[FIN.hist.length-1],top=argmax(fv);
+   fr=note(S.guess===top?'ok':'info',tpl('You guessed {'+L[S.guess]+'}. Top: {'+L[top]+'}.'));}el.innerHTML=fr;}
+ updateNext();}
+function refresh(){drawGraph();live();}
 
-/* ---------- navigation: a step unlocks only after its check is passed ---------- */
-function drawSteps(){
-  document.getElementById('steps').innerHTML=FOCUS.map(function(c,i){return '<button aria-current="'+(i===S.scr?'step':'false')+'" class="pill'+(i===S.scr?' on':'')+(S.solved[i]&&i!==S.scr?' done':'')+'"'+(i>S.unlocked?' disabled title="Pass the earlier check first"':'')+' onclick="go('+i+')">'+(S.solved[i]?'✓ ':'')+c.name+'</button>';}).join('');
-  document.getElementById('prev').style.visibility=S.scr===0?'hidden':'visible';
-  document.getElementById('next').textContent=S.solved[S.scr]?(S.scr<3?'Next step':'Review check'):(S.scr<3?'Quick check':'Final check');}
-function go(i){if(i<0||i>3||i>S.unlocked)return;pausePlay();S.scr=i;applyPreset();log('screen_enter');document.getElementById('steps').style.visibility='visible';
-  document.getElementById('wtitle').textContent=WORLD.title;document.getElementById('wintro').innerHTML=tpl(WORLD.intro);
-  drawSteps();drawPanel();refresh();window.scrollTo(0,0);}
-document.getElementById('prev').onclick=function(){log('nav_back');go(S.scr-1);};
-document.getElementById('next').onclick=function(){if(S.solved[S.scr]&&S.scr<3){log('nav_next');go(S.scr+1);}else openCheck();};
+/* ================= navigation ================= */
+function ready(){switch(S.scr){case 0:return S.guess!==null;case 1:return SIM1.ran&&!SIM1.playing;case 2:return true;case 3:return IT.stableOnce;case 4:return S.phase>=1;case 5:return FIN.done;}return false;}
+function updateNext(){var b=$('next');if(S.scr===0){b.textContent='Start exploring →';b.disabled=!ready();return;}
+ if(S.solved[S.scr]){b.textContent=S.scr<5?'Next →':'Finish';b.disabled=false;}else{b.textContent='Quick check';b.disabled=!ready();}}
+function drawSteps(){$('steps').innerHTML=TABS.map(function(t,i){return '<button class="pill'+(i===S.scr?' on':'')+(S.solved[i]?' done':'')+'"'+(i>S.unlocked?' disabled':'')+' onclick="go('+i+')">'+(S.solved[i]&&i!==S.scr?'✓ ':'')+t.name+'</button>';}).join('');
+ $('prev').style.visibility=S.scr===0?'hidden':'visible';updateNext();}
+function go(i){if(i<0||i>5||i>S.unlocked)return;stopAll();SIM1.fast=SIM4.fast=false;S.scr=i;log('screen_enter');
+ $('wtitle').textContent=WORLD.title;$('wsub').innerHTML=tpl('Each arrow is a {link} from one {unit} to another.');$('steps').style.visibility='visible';
+ drawSteps();drawPanel();refresh();window.scrollTo(0,0);if(i===1&&!SIM1.ran)s1Play();if(i===4&&!SIM4.ran)setTimeout(function(){if(S.scr===4&&!SIM4.ran&&!SIM4.anim)s4Run();},700);}
+$('prev').onclick=function(){log('nav_back');go(S.scr-1);};
+$('next').onclick=function(){if(S.scr===0){if(S.guess===null)return;S.solved[0]=true;S.unlocked=Math.max(S.unlocked,1);log('nav_next');go(1);return;}
+ if(!S.solved[S.scr]){if(ready())openCheck();return;}
+ if(S.scr<5){log('nav_next');go(S.scr+1);}else openCheck();};
 
-document.addEventListener('visibilitychange',function(){if(document.hidden){pausePlay();log('tab_hidden');}else log('tab_visible');});
+/* ================= quick checks (pop-up) ================= */
+var CHECKS={
+ 1:[{q:'Suppose {C} has PageRank π({C}) = 0.39. What does this mean?',o:['{C} has 39% of all {links} in the graph','The random surfer is on {C} about 39% of the time in the long run','{C} has 39 incoming {links}','The surfer leaves {C} with probability 0.39'],c:1,h:'PageRank counts visits, not {links}. Look at the Share column you just filled.'}],
+ 2:[{q:'{A} has two outgoing {links}, to {B} and {C}. What is the probability that the surfer goes from {A} to {B}?',o:['1/2','1','1/4','0'],c:0,h:'Count the arrows leaving {A} and split a total of 1 equally between them.'}],
+ 3:[{q:'You start with 100% on {A} instead of spreading it evenly. After many steps, the values are…',o:['Different, because the start matters','The same as from an even start','Still 100% on {A}'],c:1,h:'Pick another start and press Run until stable. Compare where the lines end.'}],
+ 4:[{q:'Why does PageRank add random jumps?',o:['To make the computation faster','Without jumps, the surfer can never reach some {units}, like {E}','To make every {unit} equally important'],c:1,h:'Think back to {E} before you added jumps.'},
+    {q:'What happens to the values if α goes from 0.15 to 0.9?',o:['They become close to equal','{C} gets everything','Nothing changes'],c:0,h:'Move the slider to 0.9. If the surfer almost always jumps, do the {links} still matter?'}],
+ 5:[{q:'In another graph, the stable values are {A} 0.20, {B} 0.45, {C} 0.30, {D} 0.05. What is the ranking?',o:['{A} > {B} > {C} > {D}','{D} > {A} > {C} > {B}','{B} > {C} > {A} > {D}'],c:2,h:'Order the values from largest to smallest.'}]};
+function fb(k,t){$('fb').innerHTML='<div class="note '+k+'">'+t+'</div>';}
+function openCheck(){stopAll();lastFocus=document.activeElement;CQ=0;if(S.solved[S.scr])renderDone();else renderQ();
+ $('modal').hidden=false;document.body.classList.add('lock');log('check_open');var f=document.querySelector('#modal input')||document.querySelector('#modal .b.main');if(f)f.focus();}
+function renderQ(){var set=CHECKS[S.scr],q=set[CQ];$('mtag').textContent='Quick check'+(set.length>1?' · '+(CQ+1)+' of '+set.length:'');
+ $('mq').innerHTML=tpl(q.q);$('mopts').innerHTML=q.o.concat(['I don’t know']).map(function(o,i){return '<label class="opt-r"><input type="radio" name="ans" value="'+i+'"><span>'+tpl(o)+'</span></label>';}).join('');
+ $('fb').innerHTML='';$('mafter').innerHTML='';$('msubmitRow').hidden=false;}
+function doCheck(){var c=document.querySelector('#modal input[name=ans]:checked');if(!c){fb('info','Choose an answer first.');return;}
+ var set=CHECKS[S.scr],q=set[CQ],v=+c.value,key=S.scr+'-'+CQ,right=v===q.c;S.attempts[key]=(S.attempts[key]||0)+1;
+ log('check',{q:key,answer:v,correct:right,attempt:S.attempts[key]});
+ if(!right){$('fb').innerHTML='<div class="hint"><span class="bot" aria-hidden="true">💡</span><div><b>'+(v===q.o.length?'No problem. ':'Not quite. ')+'Here’s a hint:</b><br>'+tpl(q.h)+'</div></div>';return;}
+ document.querySelectorAll('#modal input[name=ans]').forEach(function(x){x.disabled=true;x.parentNode.classList.add('disabled');});$('msubmitRow').hidden=true;fb('ok','Correct!');
+ if(CQ<set.length-1){$('mafter').innerHTML='<div class="row"><button class="b main" onclick="CQ++;renderQ();">Next question</button></div>';}
+ else{S.solved[S.scr]=true;S.unlocked=Math.max(S.unlocked,Math.min(5,S.scr+1));drawSteps();
+  $('mafter').innerHTML='<div class="row">'+(S.scr<5?'<button class="b main" onclick="closeModal();go(S.scr+1)">Continue →</button>':'<button class="b main" onclick="renderDone()">Finish</button>')+'</div>';}
+ var b=document.querySelector('#mafter .b.main');if(b)b.focus();}
+function renderDone(){log('lesson_complete',{attempts:S.attempts,theme:THEME});$('mtag').textContent='Done';$('mq').textContent='You made it!';$('mopts').innerHTML='';$('msubmitRow').hidden=true;$('fb').innerHTML='';
+ $('mafter').innerHTML='<div class="finish">'+tpl('{Links} set the probabilities, the values converge, and random jumps make sure every {unit} can be reached. That is PageRank.')+'</div><p class="small">Please continue to the post-test.</p><div class="row"><button class="b main" onclick="closeCheck()">Close</button></div>';}
+function closeModal(){var m=$('modal');if(m.hidden)return false;m.hidden=true;document.body.classList.remove('lock');return true;}
+function closeCheck(){if(closeModal()){log('check_close');if(lastFocus&&lastFocus.focus)lastFocus.focus();}}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('modal').hidden)closeCheck();});
+$('modal').addEventListener('click',function(e){if(e.target===this)closeCheck();});
+
+/* ================= start ================= */
+resetState();
+document.addEventListener('visibilitychange',function(){if(document.hidden){stopAll();log('tab_hidden');}else log('tab_visible');});
 log('session_start',{assignedCondition:assigned});
-document.getElementById('steps').style.visibility='hidden';
-if(assigned){document.getElementById('assignedNote').hidden=false;document.getElementById('assignedNote').textContent='Study session: your assigned path is '+(assigned==='ai'?'World Changer.':'the standard web story.');document.getElementById(assigned==='ai'?'controlPath':'aiPath').hidden=true;document.getElementById('interestBack').hidden=true;}
+$('steps').style.visibility='hidden';
+if(assigned){$('assignedNote').hidden=false;$('assignedNote').textContent='Study session: your assigned path is '+(assigned==='ai'?'World Changer.':'the classic web story.');$(assigned==='ai'?'controlPath':'aiPath').hidden=true;$('interestBack').hidden=true;}
 </script>
 </body>
 </html>

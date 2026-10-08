@@ -434,7 +434,7 @@ function drawPanel(){var h='';switch(S.scr){
   h='<h2>'+tpl('A new {unit}: {E}')+'</h2>'+story('unreach')
    +'<p>'+tpl('Can the surfer reach {E} by only following {links}?')+'</p><div id="s4table"></div><div id="s4res"></div>';
   if(S.phase>=1){
-   h+='<h3 id="s4b">Add random jumps (damping)</h3><p>'+tpl('With probability α, {surfer} {jump}.')+'</p>'+story('jump')
+   h+='<h3 id="s4b">Add random jumps (damping) (move scroll bar)</h3><p>'+tpl('With probability α, {surfer} {jump}.')+'</p>'+story('jump')
     +'<div class="ctrl"><div class="ctrl-row"><span>Damping value <b>α</b></span><span class="badge" id="albadge">'+f2(S.alpha)+'</span></div><input type="range" id="al" min="0" max="1" step="0.05" value="'+S.alpha+'" aria-label="Damping value alpha" oninput="setAlpha(this.value)" onchange="log(\'alpha_set\',{alpha:S.alpha})"><div class="ticks"><span>0 · never jump</span><span>1 · always jump</span></div></div>'
     +'<p class="small" style="margin-bottom:0">Stable values with this α:</p><div id="s4bars"></div><div id="s4note"></div>'
     +'<details class="calc"><summary>The model behind it</summary><div class="formula">P̂ = (1 − α) P + (α / N) J</div><p class="small">'+tpl('Follow a {link} (P) with 1 − α, jump anywhere (J) with α. Typical α = 0.15.')+'</p></details>';}
